@@ -22,6 +22,6 @@ public class MainWrapper {
       throw new RuntimeException("Could not find main method for class " + realMainClass.getName(), e);
     }
 
-    mainMethod.invoke(null, (String[]) args);
+    mainMethod.invoke(null, new Object[] { args });
   }
 }
