@@ -25,6 +25,7 @@
   </developers>
 
   <properties>
+    <pom.path>${project.build.directory}/${project.artifactId}-${project.version}.pom</pom.path>
     <project.build.targetJdk>1.8</project.build.targetJdk>
 
     <jets3t.version>0.9.4</jets3t.version>
@@ -32,6 +33,29 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>net.java.dev.jets3t</groupId>
+        <artifactId>jets3t</artifactId>
+        <version>${jets3t.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -41,8 +65,8 @@
       <artifactId>jets3t</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
@@ -68,17 +92,16 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
           <configuration>
+            <shadeSourcesContent>true</shadeSourcesContent>
+            <shadedArtifactAttached>false</shadedArtifactAttached>
+            <createDependencyReducedPom>true</createDependencyReducedPom>
+            <dependencyReducedPomLocation>${pom.path}</dependencyReducedPomLocation>
             <minimizeJar>true</minimizeJar>
             <filters combine.children="append">
               <filter>
-                <artifact>commons-logging:commons-logging</artifact>
-                <includes>
-                  <include>**</include>
-                </includes>
+                <artifact>net.java.dev.jets3t:jets3t</artifact>
                 <excludes>
-                  <exclude>META-INF/*.SF</exclude>
-                  <exclude>META-INF/*.DSA</exclude>
-                  <exclude>META-INF/*.RSA</exclude>
+                  <exclude>images/**</exclude>
                 </excludes>
               </filter>
             </filters>
