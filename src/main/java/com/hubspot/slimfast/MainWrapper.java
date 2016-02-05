@@ -1,6 +1,5 @@
 package com.hubspot.slimfast;
 
-
 import java.lang.reflect.Method;
 import java.util.jar.Manifest;
 
@@ -23,6 +22,6 @@ public class MainWrapper {
       throw new RuntimeException("Could not find main method for class " + realMainClass.getName(), e);
     }
 
-    mainMethod.invoke(null, args);
+    mainMethod.invoke(null, (String[]) args);
   }
 }
