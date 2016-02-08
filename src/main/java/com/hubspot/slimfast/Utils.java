@@ -1,5 +1,9 @@
 package com.hubspot.slimfast;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +21,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utils {
+
+  /**
+   * Mainly here so maven-shade-plugin doesn't remove PoolingClientConnectionManager when minimizing the JAR
+   */
+  public static HttpClient newHttpClient(Configuration config) {
+    PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
+    connectionManager.setDefaultMaxPerRoute(config.getS3DownloadThreads());
+    connectionManager.setMaxTotal(config.getS3DownloadThreads());
+
+    return new DefaultHttpClient(connectionManager);
+  }
 
   public static Manifest readManifest() throws IOException {
     for (URL url : Collections.list(classLoader().getResources("META-INF/MANIFEST.MF"))) {
