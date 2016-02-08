@@ -9,13 +9,13 @@
   </parent>
 
   <artifactId>SlimFast</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
 
   <scm>
     <connection>scm:git:git@github.com:HubSpot/SlimFast.git</connection>
     <developerConnection>scm:git:git@github.com:HubSpot/SlimFast.git</developerConnection>
     <url>git@github.com:HubSpot/SlimFast.git</url>
-    <tag>HEAD</tag>
+    <tag>SlimFast-0.2</tag>
   </scm>
 
   <developers>
