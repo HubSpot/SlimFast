@@ -25,10 +25,10 @@ public class Utils {
   /**
    * Mainly here so maven-shade-plugin doesn't remove PoolingClientConnectionManager when minimizing the JAR
    */
-  public static HttpClient newHttpClient(Configuration config) {
+  public static HttpClient newHttpClient(int connections) {
     PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
-    connectionManager.setDefaultMaxPerRoute(config.getS3DownloadThreads());
-    connectionManager.setMaxTotal(config.getS3DownloadThreads());
+    connectionManager.setDefaultMaxPerRoute(connections);
+    connectionManager.setMaxTotal(connections);
 
     return new DefaultHttpClient(connectionManager);
   }
