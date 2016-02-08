@@ -7,9 +7,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.security.CodeSource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,6 +62,21 @@ public class Utils {
       return new File(codeSource.getLocation().toURI().getPath()).toPath().getParent();
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  public static <T> T findImplementation(Class<T> type, T defaultImplementation) {
+    List<T> implementations = new ArrayList<>();
+    for (T implementation : ServiceLoader.load(type)) {
+      implementations.add(implementation);
+    }
+
+    if (implementations.isEmpty()) {
+      return defaultImplementation;
+    } else if (implementations.size() > 1) {
+      throw new IllegalStateException("Multiple implementations found: " + implementations);
+    } else {
+      return implementations.get(0);
     }
   }
 

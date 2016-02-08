@@ -1,8 +1,6 @@
 package com.hubspot.slimfast;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -18,7 +16,7 @@ public class DownloadJars {
     List<String> jars = Utils.parseClassPath(manifest, config);
 
     ExecutorService executor = Executors.newFixedThreadPool(config.getS3DownloadThreads());
-    JarDownloader downloader = findJarDownloader();
+    JarDownloader downloader = Utils.findImplementation(JarDownloader.class, new DefaultJarDownloader());
 
     List<Future<?>> futures = jars.stream()
         .map(jar -> executor.submit(() -> {
@@ -35,21 +33,6 @@ public class DownloadJars {
 
     for (Future<?> future : futures) {
       future.get();
-    }
-  }
-
-  private static JarDownloader findJarDownloader() {
-    List<JarDownloader> downloaders = new ArrayList<>();
-    for (JarDownloader downloader : ServiceLoader.load(JarDownloader.class)) {
-      downloaders.add(downloader);
-    }
-
-    if (downloaders.isEmpty()) {
-      return new DefaultJarDownloader();
-    } else if (downloaders.size() > 1) {
-      throw new IllegalStateException("Multiple JAR downloaders found: " + downloaders);
-    } else {
-      return downloaders.get(0);
     }
   }
 }
