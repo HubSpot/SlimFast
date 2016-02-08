@@ -1,9 +1,7 @@
 package com.hubspot.slimfast;
 
 import org.jets3t.service.S3Service;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Object;
-import org.jets3t.service.security.AWSCredentials;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -11,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.CodeSource;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,22 +18,21 @@ import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 public class DownloadJars {
-  private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(10);
 
   public static void main(String... args) throws Exception {
     Manifest manifest = Utils.readManifest();
-    List<String> jars = Utils.parseClassPath(manifest);
-    Properties s3Properties = Utils.readS3Properties();
+    Configuration config = Utils.readConfiguration();
+    List<String> jars = Utils.parseClassPath(manifest, config);
 
-    AWSCredentials credentials = new AWSCredentials(s3Properties.getProperty("s3.access.key"), s3Properties.getProperty("s3.secret.key"));
-    S3Service s3Service = new RestS3Service(credentials);
+    ExecutorService executor = Executors.newFixedThreadPool(config.getS3DownloadThreads());
+    S3Service s3Service = config.newS3Service();
 
     List<Future<?>> futures = jars.stream()
-        .map(jar -> EXECUTOR.submit(new DownloadJarTask(s3Service, s3Properties, jar)))
+        .map(jar -> executor.submit(new DownloadJarTask(s3Service, config, jar)))
         .collect(Collectors.toList());
 
-    EXECUTOR.shutdown();
-    if (!EXECUTOR.awaitTermination(5, TimeUnit.MINUTES)) {
+    executor.shutdown();
+    if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
       System.out.println("Took more than 5 minutes to download JARs, quitting!");
       System.exit(1);
     }
@@ -65,11 +61,11 @@ public class DownloadJars {
     private final String s3Key;
     private final Path localPath;
 
-    public DownloadJarTask(S3Service s3Service, Properties s3Properties, String jar) {
+    public DownloadJarTask(S3Service s3Service, Configuration config, String jar) {
       this.s3Service = s3Service;
-      this.s3Bucket = s3Properties.getProperty("s3.bucket");
-      this.s3Key = s3Properties.getProperty("s3.artifact.root") + "/" + jar;
-      this.localPath = jarDirectory().resolve(Utils.CLASSPATH_PREFIX).resolve(jar);;
+      this.s3Bucket = config.getS3Bucket();
+      this.s3Key = config.getS3ArtifactRoot() + "/" + jar;
+      this.localPath = jarDirectory().resolve(config.getClasspathPrefix()).resolve(jar);;
     }
 
     @Override

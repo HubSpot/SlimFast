@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utils {
-  public static final String CLASSPATH_PREFIX = "lib/";
 
   public static Manifest readManifest() throws IOException {
     for (URL url : Collections.list(classLoader().getResources("META-INF/MANIFEST.MF"))) {
@@ -26,23 +25,23 @@ public class Utils {
     throw new IllegalStateException("Could not find manifest with a Class-Path attribute");
   }
 
-  public static Properties readS3Properties() throws IOException {
-    try (InputStream propertiesStream = classLoader().getResourceAsStream("slimfast.s3.properties")) {
-      Properties s3Properties = new Properties();
-      s3Properties.load(propertiesStream);
-      return s3Properties;
+  public static Configuration readConfiguration() throws IOException {
+    try (InputStream propertiesStream = classLoader().getResourceAsStream("slimfast.properties")) {
+      Properties properties = new Properties();
+      properties.load(propertiesStream);
+      return new Configuration(properties);
     }
   }
 
-  public static List<String> parseClassPath(Manifest manifest) {
+  public static List<String> parseClassPath(Manifest manifest, Configuration config) {
     String classPath = manifest.getMainAttributes().getValue("Class-Path");
 
     return Stream.of(classPath.split(" "))
         .map(path -> {
-          if (!path.startsWith(CLASSPATH_PREFIX)) {
-            throw new IllegalArgumentException("Expected to start with " + CLASSPATH_PREFIX + " but was " + path);
+          if (!path.startsWith(config.getClasspathPrefix())) {
+            throw new IllegalArgumentException("Expected to start with " + config.getClasspathPrefix() + " but was " + path);
           } else {
-            return path.substring(CLASSPATH_PREFIX.length());
+            return path.substring(config.getClasspathPrefix().length());
           }
         }).collect(Collectors.toList());
   }
