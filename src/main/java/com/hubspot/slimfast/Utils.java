@@ -1,8 +1,12 @@
 package com.hubspot.slimfast;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.security.CodeSource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -44,6 +48,19 @@ public class Utils {
             return path.substring(config.getClasspathPrefix().length());
           }
         }).collect(Collectors.toList());
+  }
+
+  public static Path jarDirectory() {
+    CodeSource codeSource = DownloadJars.class.getProtectionDomain().getCodeSource();
+    if (codeSource == null) {
+      throw new RuntimeException("Cannot determine JAR directory, are you running from a JAR?");
+    }
+
+    try {
+      return new File(codeSource.getLocation().toURI().getPath()).toPath().getParent();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static ClassLoader classLoader() {
