@@ -16,11 +16,11 @@ public class Configuration {
   private final int s3DownloadThreads;
 
   public Configuration(Properties properties) {
-    this.classpathPrefix = properties.getProperty("classpath.prefix");
-    this.s3Bucket = properties.getProperty("s3.bucket");
-    this.s3ArtifactRoot = properties.getProperty("s3.artifact.root");
-    this.s3AccessKey = properties.getProperty("s3.access.key");
-    this.s3SecretKey = properties.getProperty("s3.secret.key");
+    this.classpathPrefix = checkNotNull(properties.getProperty("classpath.prefix"));
+    this.s3Bucket = checkNotNull(properties.getProperty("s3.bucket"));
+    this.s3ArtifactRoot = checkNotNull(properties.getProperty("s3.artifact.root"));
+    this.s3AccessKey = checkNotNull(properties.getProperty("s3.access.key"));
+    this.s3SecretKey = checkNotNull(properties.getProperty("s3.secret.key"));
     this.s3UploadThreads = Integer.parseInt(properties.getProperty("s3.upload.threads", "10"));
     this.s3DownloadThreads = Integer.parseInt(properties.getProperty("s3.download.threads", "10"));
   }
@@ -56,5 +56,13 @@ public class Configuration {
 
   public int getS3DownloadThreads() {
     return s3DownloadThreads;
+  }
+
+  private static String checkNotNull(String s) {
+    if (s == null) {
+      throw new NullPointerException();
+    } else {
+      return s;
+    }
   }
 }
