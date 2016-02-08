@@ -16,9 +16,14 @@ import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 public class UploadJars {
-  private static final String REPOSITORY_PREFIX = System.getProperty("user.home") + "/.m2/repository/";
+  private static String REPOSITORY_PREFIX;
 
   public static void main(String... args) throws Exception {
+    REPOSITORY_PREFIX = args[0];
+    if (!REPOSITORY_PREFIX.endsWith("/")) {
+      REPOSITORY_PREFIX += "/";
+    }
+
     Manifest manifest = Utils.readManifest();
     Configuration config = Utils.readConfiguration();
     List<String> jars = Utils.parseClassPath(manifest, config);
