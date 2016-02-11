@@ -10,14 +10,14 @@
 
   <groupId>com.hubspot.maven.plugins</groupId>
   <artifactId>slimfast-plugin</artifactId>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <scm>
     <connection>scm:git:git@github.com:HubSpot/SlimFast.git</connection>
     <developerConnection>scm:git:git@github.com:HubSpot/SlimFast.git</developerConnection>
     <url>git@github.com:HubSpot/SlimFast.git</url>
-    <tag>slimfast-plugin-0.4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
