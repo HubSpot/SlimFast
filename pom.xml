@@ -8,8 +8,10 @@
     <version>15.1</version>
   </parent>
 
-  <artifactId>SlimFast</artifactId>
+  <groupId>com.hubspot.maven.plugins</groupId>
+  <artifactId>slimfast-plugin</artifactId>
   <version>0.4-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
 
   <scm>
     <connection>scm:git:git@github.com:HubSpot/SlimFast.git</connection>
@@ -25,24 +27,58 @@
     </developer>
   </developers>
 
-  <properties>
-    <pom.path>${project.build.directory}/${project.artifactId}-${project.version}.pom</pom.path>
-    <project.build.targetJdk>1.8</project.build.targetJdk>
+  <prerequisites>
+    <maven>3</maven>
+  </prerequisites>
 
-    <jets3t.version>0.9.4</jets3t.version>
+  <properties>
+    <dep.guava.version>18.0</dep.guava.version>
+
+    <snappy.version>0.4</snappy.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-archiver</artifactId>
+        <version>3.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-artifact</artifactId>
+        <version>3.3.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>3.3.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-model</artifactId>
+        <version>3.3.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>3.3.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven.plugin-tools</groupId>
+        <artifactId>maven-plugin-annotations</artifactId>
+        <version>3.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-archiver</artifactId>
+        <version>3.0.3</version>
+      </dependency>
+      <dependency>
         <groupId>net.java.dev.jets3t</groupId>
         <artifactId>jets3t</artifactId>
-        <version>${jets3t.version}</version>
+        <version>0.9.4</version>
         <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
           <exclusion>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
@@ -62,17 +98,33 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-archiver</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-archiver</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
       <groupId>net.java.dev.jets3t</groupId>
       <artifactId>jets3t</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <scope>runtime</scope>
     </dependency>
   </dependencies>
 
@@ -81,52 +133,10 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>${dep.plugin.jar.version}</version>
-          <configuration>
-            <archive>
-              <manifest>
-                <addClasspath>true</addClasspath>
-                <classpathPrefix>lib/</classpathPrefix>
-                <classpathLayoutType>repository</classpathLayoutType>
-              </manifest>
-            </archive>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <configuration>
-            <shadeSourcesContent>true</shadeSourcesContent>
-            <shadedArtifactAttached>false</shadedArtifactAttached>
-            <createDependencyReducedPom>true</createDependencyReducedPom>
-            <dependencyReducedPomLocation>${pom.path}</dependencyReducedPomLocation>
-            <minimizeJar>true</minimizeJar>
-            <filters combine.children="append">
-              <filter>
-                <artifact>net.java.dev.jets3t:jets3t</artifact>
-                <excludes>
-                  <exclude>images/**</exclude>
-                </excludes>
-              </filter>
-            </filters>
-          </configuration>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>3.4</version>
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
   </build>
 </project>
