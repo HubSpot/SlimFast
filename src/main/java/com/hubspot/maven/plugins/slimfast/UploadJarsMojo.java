@@ -63,7 +63,7 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(defaultValue = "${settings.localRepository}")
   private String repositoryPath;
 
-  @Parameter(defaultValue = "false")
+  @Parameter(property = "slimfast.plugin.skip", defaultValue = "false")
   private boolean skip;
 
   @Override
