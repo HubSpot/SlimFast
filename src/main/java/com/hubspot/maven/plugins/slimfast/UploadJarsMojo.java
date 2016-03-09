@@ -154,7 +154,7 @@ public class UploadJarsMojo extends AbstractMojo {
     } catch (ClassNotFoundException e) {
       throw new MojoExecutionException("Unable to find file uploader implementation", e);
     } catch (InstantiationException | IllegalAccessException e) {
-      throw new MojoExecutionException("Unable to instanitate file uploader", e);
+      throw new MojoExecutionException("Unable to instantiate file uploader", e);
     } catch (ClassCastException e) {
       throw new MojoExecutionException("Must implement FileUploader interface", e);
     }
