@@ -66,6 +66,12 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.plugin.skip", defaultValue = "false")
   private boolean skip;
 
+  @Parameter(defaultValue = "${project.build.directory}/s3.dependencies.json")
+  private String outputFile;
+
+  @Parameter(defaultValue = "false")
+  private boolean allowUnresolvedSnapshots;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
@@ -125,7 +131,9 @@ public class UploadJarsMojo extends AbstractMojo {
         s3Bucket,
         s3ArtifactRoot,
         s3AccessKey,
-        s3SecretKey
+        s3SecretKey,
+        outputFile,
+        allowUnresolvedSnapshots
     );
   }
 

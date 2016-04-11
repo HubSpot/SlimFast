@@ -11,19 +11,25 @@ public class Configuration {
   private final String s3ArtifactRoot;
   private final String s3AccessKey;
   private final String s3SecretKey;
+  private final String outputFile;
+  private final boolean allowUnresolvedSnapshots;
 
   public Configuration(String classpathPrefix,
                        String repositoryPath,
                        String s3Bucket,
                        String s3ArtifactRoot,
                        String s3AccessKey,
-                       String s3SecretKey) {
+                       String s3SecretKey,
+                       String outputFile,
+                       boolean allowUnresolvedSnapshots) {
     this.classpathPrefix = classpathPrefix;
     this.repositoryPath = repositoryPath;
     this.s3Bucket = s3Bucket;
     this.s3ArtifactRoot = s3ArtifactRoot;
     this.s3AccessKey = s3AccessKey;
     this.s3SecretKey = s3SecretKey;
+    this.outputFile = outputFile;
+    this.allowUnresolvedSnapshots = allowUnresolvedSnapshots;
   }
 
   public S3Service newS3Service() {
@@ -53,5 +59,13 @@ public class Configuration {
 
   public String getS3SecretKey() {
     return s3SecretKey;
+  }
+
+  public String getOutputFile() {
+    return outputFile;
+  }
+
+  public boolean isAllowUnresolvedSnapshots() {
+    return allowUnresolvedSnapshots;
   }
 }
