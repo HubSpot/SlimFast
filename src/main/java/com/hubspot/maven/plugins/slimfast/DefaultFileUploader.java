@@ -46,6 +46,13 @@ public class DefaultFileUploader implements FileUploader {
     String s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(file).toString();
     Path localPath = Paths.get(config.getRepositoryPath()).resolve(file);
 
+    if (keyExists(config.getS3Bucket(), s3Key)) {
+      log.info("Key already exists " + s3Key);
+    } else {
+      doUpload(config.getS3Bucket(), s3Key, localPath);
+      log.info("Successfully uploaded key " + s3Key);
+    }
+
     JSONObject s3Dependency = new JSONObject();
     s3Dependency.put("s3Bucket", config.getS3Bucket());
     s3Dependency.put("s3ObjectKey", s3Key);
@@ -53,13 +60,6 @@ public class DefaultFileUploader implements FileUploader {
     s3Dependency.put("md5", md5(localPath));
     s3Dependency.put("filesize", size(localPath));
     s3Dependencies.add(s3Dependency);
-
-    if (keyExists(config.getS3Bucket(), s3Key)) {
-      log.info("Key already exists " + s3Key);
-    } else {
-      doUpload(config.getS3Bucket(), s3Key, localPath);
-      log.info("Successfully uploaded key " + s3Key);
-    }
   }
 
   @Override
