@@ -25,22 +25,22 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @Mojo(name = "download", threadSafe = true)
 public class DownloadJarsMojo extends AbstractMojo {
 
-  @Parameter(alias = "fileDownloader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileDownloader")
+  @Parameter(property = "slimfast.fileDownloader", alias = "fileDownloader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileDownloader")
   private String fileDownloaderType;
 
-  @Parameter(defaultValue = "${s3.access.key}", required = true)
+  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}", required = true)
   private String s3AccessKey;
 
-  @Parameter(defaultValue = "${s3.secret.key}", required = true)
+  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
   private String s3SecretKey;
 
-  @Parameter(defaultValue = "10")
+  @Parameter(property = "slimfast.s3.downloadThreads", defaultValue = "10")
   private int s3DownloadThreads;
 
-  @Parameter(defaultValue = "${settings.localRepository}")
+  @Parameter(property = "slimfast.cacheDirectory", defaultValue = "${settings.localRepository}")
   private String cacheDirectory;
 
-  @Parameter(defaultValue = "${project.build.directory}/s3.artifacts.json")
+  @Parameter(property = "slimfast.inputFile", defaultValue = "${project.build.directory}/s3.artifacts.json")
   private String inputFile;
 
   @Override

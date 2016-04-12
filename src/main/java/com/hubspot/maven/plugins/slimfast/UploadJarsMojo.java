@@ -42,34 +42,34 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(alias = "manifest")
   private ManifestConfiguration manifestConfiguration = new ManifestConfiguration();
 
-  @Parameter(alias = "fileUploader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader")
+  @Parameter(property = "slimfast.fileUploader", alias = "fileUploader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader")
   private String fileUploaderType;
 
-  @Parameter(defaultValue = "${s3.bucket}", required = true)
+  @Parameter(property = "slimfast.s3.bucket", defaultValue = "${s3.bucket}", required = true)
   private String s3Bucket;
 
-  @Parameter(defaultValue = "${s3.artifact.root}", required = true)
+  @Parameter(property = "slimfast.s3.artifactPrefix", defaultValue = "${s3.artifact.root}", required = true)
   private String s3ArtifactRoot;
 
-  @Parameter(defaultValue = "${s3.access.key}", required = true)
+  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}", required = true)
   private String s3AccessKey;
 
-  @Parameter(defaultValue = "${s3.secret.key}", required = true)
+  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
   private String s3SecretKey;
 
-  @Parameter(defaultValue = "10")
+  @Parameter(property = "slimfast.s3.uploadThreads", defaultValue = "10")
   private int s3UploadThreads;
 
-  @Parameter(defaultValue = "${settings.localRepository}")
+  @Parameter(property = "slimfast.repositoryPath", defaultValue = "${settings.localRepository}")
   private String repositoryPath;
 
   @Parameter(property = "slimfast.plugin.skip", defaultValue = "false")
   private boolean skip;
 
-  @Parameter(defaultValue = "${project.build.directory}/s3.artifacts.json")
+  @Parameter(property = "slimfast.outputFile", defaultValue = "${project.build.directory}/s3.artifacts.json")
   private String outputFile;
 
-  @Parameter(defaultValue = "false")
+  @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "false")
   private boolean allowUnresolvedSnapshots;
 
   @Override
