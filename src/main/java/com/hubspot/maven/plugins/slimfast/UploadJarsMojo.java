@@ -66,7 +66,7 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.plugin.skip", defaultValue = "false")
   private boolean skip;
 
-  @Parameter(defaultValue = "${project.build.directory}/s3.dependencies.json")
+  @Parameter(defaultValue = "${project.build.directory}/s3.artifacts.json")
   private String outputFile;
 
   @Parameter(defaultValue = "false")
@@ -79,7 +79,7 @@ public class UploadJarsMojo extends AbstractMojo {
       return;
     }
 
-    final Configuration configuration = buildConfiguration();
+    final UploadConfiguration configuration = buildConfiguration();
     Set<String> classpathEntries = getClasspathEntries();
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-upload").setDaemon(true).build();
@@ -124,8 +124,8 @@ public class UploadJarsMojo extends AbstractMojo {
     }
   }
 
-  private Configuration buildConfiguration() {
-    return new Configuration(
+  private UploadConfiguration buildConfiguration() {
+    return new UploadConfiguration(
         manifestConfiguration.getClasspathPrefix(),
         repositoryPath,
         s3Bucket,

@@ -4,7 +4,7 @@ import org.jets3t.service.S3Service;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 
-public class Configuration {
+public class UploadConfiguration {
   private final String classpathPrefix;
   private final String repositoryPath;
   private final String s3Bucket;
@@ -14,14 +14,14 @@ public class Configuration {
   private final String outputFile;
   private final boolean allowUnresolvedSnapshots;
 
-  public Configuration(String classpathPrefix,
-                       String repositoryPath,
-                       String s3Bucket,
-                       String s3ArtifactRoot,
-                       String s3AccessKey,
-                       String s3SecretKey,
-                       String outputFile,
-                       boolean allowUnresolvedSnapshots) {
+  public UploadConfiguration(String classpathPrefix,
+                             String repositoryPath,
+                             String s3Bucket,
+                             String s3ArtifactRoot,
+                             String s3AccessKey,
+                             String s3SecretKey,
+                             String outputFile,
+                             boolean allowUnresolvedSnapshots) {
     this.classpathPrefix = classpathPrefix;
     this.repositoryPath = repositoryPath;
     this.s3Bucket = s3Bucket;
