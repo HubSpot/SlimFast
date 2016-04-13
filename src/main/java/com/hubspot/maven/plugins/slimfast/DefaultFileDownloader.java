@@ -28,15 +28,20 @@ public class DefaultFileDownloader implements FileDownloader {
 
   @Override
   public void download(DownloadConfiguration config, S3Artifact artifact) throws MojoExecutionException, MojoFailureException {
+    Path targetFile = Paths.get(artifact.getTargetPath());
+    if (artifactIsCached(targetFile, artifact)) {
+      log.info("Target file exists " + targetFile);
+      return;
+    }
+
     Path cacheFile = cacheDirectory.resolve(artifact.getTargetPath());
     if (artifactIsCached(cacheFile, artifact)) {
-      log.info("File already exists " + cacheFile);
+      log.info("Target file is cached " + cacheFile);
     } else {
       doDownload(artifact.getBucket(), artifact.getKey(), cacheFile);
       log.info("Successfully downloaded key " + artifact.getKey());
     }
 
-    Path targetFile = Paths.get(artifact.getTargetPath());
     FileHelper.ensureDirectoryExists(targetFile.getParent());
 
     try {

@@ -1,5 +1,7 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import java.util.Objects;
+
 public class S3Artifact {
   private final String bucket;
   private final String key;
@@ -33,5 +35,28 @@ public class S3Artifact {
 
   public long getSize() {
     return size;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    S3Artifact artifact = (S3Artifact) o;
+    return Objects.equals(size, artifact.size) &&
+        Objects.equals(bucket, artifact.bucket) &&
+        Objects.equals(key, artifact.key) &&
+        Objects.equals(targetPath, artifact.targetPath) &&
+        Objects.equals(md5, artifact.md5);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(bucket, key, targetPath, md5, size);
   }
 }

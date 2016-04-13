@@ -11,19 +11,20 @@ import org.jets3t.service.model.S3Object;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class DefaultFileUploader implements FileUploader {
   private S3Service s3Service;
-  private List<S3Artifact> s3Artifacts;
+  private Set<S3Artifact> s3Artifacts;
   private Path outputFile;
   private Log log;
 
   @Override
   public void init(UploadConfiguration config, Log log) {
     this.s3Service = config.newS3Service();
-    this.s3Artifacts = new ArrayList<>();
+    this.s3Artifacts = Collections.synchronizedSet(new LinkedHashSet<S3Artifact>());
     this.outputFile = config.getOutputFile();
     this.log = log;
   }

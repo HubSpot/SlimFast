@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +49,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     final DownloadConfiguration configuration = buildConfiguration();
     FileHelper.ensureDirectoryExists(configuration.getCacheDirectory());
 
-    Collection<S3Artifact> artifacts = readArtifacts();
+    Set<S3Artifact> artifacts = readArtifacts();
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-download").setDaemon(true).build();
     ExecutorService executor = Executors.newFixedThreadPool(s3DownloadThreads, threadFactory);
@@ -73,7 +73,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     downloader.destroy();
   }
 
-  private Collection<S3Artifact> readArtifacts() throws MojoFailureException {
+  private Set<S3Artifact> readArtifacts() throws MojoFailureException {
     try {
       return JsonHelper.readArtifactsFromJson(new File(inputFile));
     } catch (IOException e) {

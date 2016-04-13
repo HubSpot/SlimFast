@@ -11,9 +11,8 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,7 +21,7 @@ import org.json.simple.parser.ParseException;
 
 public class JsonHelper {
 
-  public static void writeArtifactsToJson(File outputFile, Collection<S3Artifact> artifacts) throws IOException {
+  public static void writeArtifactsToJson(File outputFile, Set<S3Artifact> artifacts) throws IOException {
     JSONArray json = new JSONArray();
     for (S3Artifact artifact : artifacts) {
       json.add(toJsonObject(artifact));
@@ -34,14 +33,14 @@ public class JsonHelper {
     }
   }
 
-  public static Collection<S3Artifact> readArtifactsFromJson(File inputFile) throws IOException {
+  public static Set<S3Artifact> readArtifactsFromJson(File inputFile) throws IOException {
     JSONParser parser = new JSONParser();
 
     try (Reader reader = newReader(inputFile)) {
       try {
         JSONArray parsed = (JSONArray) parser.parse(reader);
 
-        List<S3Artifact> artifacts = new ArrayList<>();
+        Set<S3Artifact> artifacts = new LinkedHashSet<>();
         for (Object object : parsed) {
           artifacts.add(fromJsonObject((JSONObject) object));
         }
