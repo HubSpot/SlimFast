@@ -1,6 +1,7 @@
 package com.hubspot.maven.plugins.slimfast;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,7 +66,9 @@ public class DefaultFileDownloader implements FileDownloader {
 
     try {
       S3Object s3Object = s3Service.getObject(bucket, key);
-      Files.copy(s3Object.getDataInputStream(), tempPath);
+      try (InputStream input = s3Object.getDataInputStream()) {
+        Files.copy(input, tempPath, StandardCopyOption.REPLACE_EXISTING);
+      }
     } catch (ServiceException e) {
       throw new MojoFailureException("Error downloading key " + key, e);
     } catch (IOException e) {
@@ -73,6 +76,7 @@ public class DefaultFileDownloader implements FileDownloader {
     }
 
     try {
+      FileHelper.ensureDirectoryExists(path.getParent());
       Files.move(tempPath, path, StandardCopyOption.ATOMIC_MOVE);
     } catch (IOException e) {
       throw new MojoFailureException(String.format("Error moving file from %s to %s", tempPath, path), e);
