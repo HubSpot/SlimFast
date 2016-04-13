@@ -18,6 +18,7 @@ import java.util.Set;
 public class DefaultFileUploader implements FileUploader {
   private S3Service s3Service;
   private Set<S3Artifact> s3Artifacts;
+  private Path classpathPrefix;
   private Path outputFile;
   private Log log;
 
@@ -25,6 +26,7 @@ public class DefaultFileUploader implements FileUploader {
   public void init(UploadConfiguration config, Log log) {
     this.s3Service = config.newS3Service();
     this.s3Artifacts = Collections.synchronizedSet(new LinkedHashSet<S3Artifact>());
+    this.classpathPrefix = config.getClasspathPrefix();
     this.outputFile = config.getOutputFile();
     this.log = log;
   }
@@ -45,14 +47,14 @@ public class DefaultFileUploader implements FileUploader {
       log.info("Successfully uploaded key " + s3Key);
     }
 
-    String targetPath = Paths.get(config.getClasspathPrefix()).resolve(file).toString();
+    String targetPath = classpathPrefix.resolve(file).toString();
     s3Artifacts.add(new S3Artifact(config.getS3Bucket(), s3Key, targetPath, FileHelper.md5(localPath), FileHelper.size(localPath)));
   }
 
   @Override
   public void destroy() throws MojoFailureException {
     try {
-      JsonHelper.writeArtifactsToJson(outputFile.toFile(), s3Artifacts);
+      JsonHelper.writeArtifactsToJson(outputFile.toFile(), new ArtifactWrapper(classpathPrefix.toString(), s3Artifacts));
     } catch (IOException e) {
       throw new MojoFailureException("Error writing dependencies json to file", e);
     }

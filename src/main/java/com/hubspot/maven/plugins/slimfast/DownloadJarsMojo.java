@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,15 +40,18 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.cacheDirectory", defaultValue = "${settings.localRepository}")
   private String cacheDirectory;
 
-  @Parameter(property = "slimfast.inputFile", defaultValue = "${project.build.directory}/s3.artifacts.json")
+  @Parameter(property = "slimfast.outputDirectory", defaultValue = "${project.build.directory}")
+  private String outputDirectory;
+
+  @Parameter(property = "slimfast.inputFile", defaultValue = "${project.build.directory}/slimfast.json")
   private String inputFile;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    final DownloadConfiguration configuration = buildConfiguration();
-    FileHelper.ensureDirectoryExists(configuration.getCacheDirectory());
+    ArtifactWrapper wrapper = readArtifactInfo();
 
-    Set<S3Artifact> artifacts = readArtifacts();
+    final DownloadConfiguration configuration = buildConfiguration(wrapper.getClasspathPrefix());
+    FileHelper.ensureDirectoryExists(configuration.getCacheDirectory());
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-download").setDaemon(true).build();
     ExecutorService executor = Executors.newFixedThreadPool(s3DownloadThreads, threadFactory);
@@ -57,7 +59,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     downloader.init(configuration, getLog());
 
     List<Future<?>> futures = new ArrayList<>();
-    for (final S3Artifact artifact : artifacts) {
+    for (final S3Artifact artifact : wrapper.getArtifacts()) {
       futures.add(executor.submit(new Callable<Object>() {
 
         @Override
@@ -73,7 +75,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     downloader.destroy();
   }
 
-  private Set<S3Artifact> readArtifacts() throws MojoFailureException {
+  private ArtifactWrapper readArtifactInfo() throws MojoFailureException {
     try {
       return JsonHelper.readArtifactsFromJson(new File(inputFile));
     } catch (IOException e) {
@@ -101,8 +103,14 @@ public class DownloadJarsMojo extends AbstractMojo {
     }
   }
 
-  private DownloadConfiguration buildConfiguration() {
-    return new DownloadConfiguration(Paths.get(cacheDirectory), s3AccessKey, s3SecretKey);
+  private DownloadConfiguration buildConfiguration(String classpathPrefix) {
+    return new DownloadConfiguration(
+        Paths.get(classpathPrefix),
+        Paths.get(cacheDirectory),
+        Paths.get(outputDirectory),
+        s3AccessKey,
+        s3SecretKey
+    );
   }
 
   private FileDownloader instantiateFileDownloader() throws MojoExecutionException {

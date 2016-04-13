@@ -7,7 +7,7 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 
 public class UploadConfiguration {
-  private final String classpathPrefix;
+  private final Path classpathPrefix;
   private final String repositoryPath;
   private final String s3Bucket;
   private final String s3ArtifactRoot;
@@ -16,7 +16,7 @@ public class UploadConfiguration {
   private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
 
-  public UploadConfiguration(String classpathPrefix,
+  public UploadConfiguration(Path classpathPrefix,
                              String repositoryPath,
                              String s3Bucket,
                              String s3ArtifactRoot,
@@ -39,7 +39,7 @@ public class UploadConfiguration {
     return new RestS3Service(credentials);
   }
 
-  public String getClasspathPrefix() {
+  public Path getClasspathPrefix() {
     return classpathPrefix;
   }
 

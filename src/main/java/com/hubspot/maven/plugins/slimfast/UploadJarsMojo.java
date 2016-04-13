@@ -17,7 +17,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.jar.Manifest;
 import org.codehaus.plexus.archiver.jar.ManifestException;
 
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +67,7 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.plugin.skip", defaultValue = "false")
   private boolean skip;
 
-  @Parameter(property = "slimfast.outputFile", defaultValue = "${project.build.directory}/s3.artifacts.json")
+  @Parameter(property = "slimfast.outputFile", defaultValue = "${project.build.directory}/slimfast.json")
   private String outputFile;
 
   @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "false")
@@ -130,7 +129,7 @@ public class UploadJarsMojo extends AbstractMojo {
 
   private UploadConfiguration buildConfiguration() {
     return new UploadConfiguration(
-        manifestConfiguration.getClasspathPrefix(),
+        Paths.get(manifestConfiguration.getClasspathPrefix()),
         repositoryPath,
         s3Bucket,
         s3ArtifactRoot,

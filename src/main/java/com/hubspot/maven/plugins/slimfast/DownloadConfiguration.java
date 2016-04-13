@@ -7,14 +7,20 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 
 public class DownloadConfiguration {
+  private final Path classpathPrefix;
   private final Path cacheDirectory;
+  private final Path outputDirectory;
   private final String s3AccessKey;
   private final String s3SecretKey;
 
-  public DownloadConfiguration(Path cacheDirectory,
+  public DownloadConfiguration(Path classpathPrefix,
+                               Path cacheDirectory,
+                               Path outputDirectory,
                                String s3AccessKey,
                                String s3SecretKey) {
+    this.classpathPrefix = classpathPrefix;
     this.cacheDirectory = cacheDirectory;
+    this.outputDirectory = outputDirectory;
     this.s3AccessKey = s3AccessKey;
     this.s3SecretKey = s3SecretKey;
   }
@@ -24,8 +30,16 @@ public class DownloadConfiguration {
     return new RestS3Service(credentials);
   }
 
+  public Path getClasspathPrefix() {
+    return classpathPrefix;
+  }
+
   public Path getCacheDirectory() {
     return cacheDirectory;
+  }
+
+  public Path getOutputDirectory() {
+    return outputDirectory;
   }
 
   public String getS3AccessKey() {
