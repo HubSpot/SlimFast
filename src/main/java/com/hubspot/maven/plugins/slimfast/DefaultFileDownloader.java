@@ -21,7 +21,7 @@ public class DefaultFileDownloader implements FileDownloader {
   @Override
   public void init(DownloadConfiguration config, Log log) {
     this.s3Service = config.newS3Service();
-    this.cacheDirectory = Paths.get(config.getCacheDirectory());
+    this.cacheDirectory = config.getCacheDirectory();
     this.log = log;
   }
 
@@ -36,6 +36,8 @@ public class DefaultFileDownloader implements FileDownloader {
     }
 
     Path targetFile = Paths.get(artifact.getTargetPath());
+    FileHelper.ensureDirectoryExists(targetFile.getParent());
+
     try {
       Files.copy(cacheFile, targetFile);
     } catch (IOException e) {

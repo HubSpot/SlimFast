@@ -8,7 +8,6 @@ import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.HttpException;
 import org.jets3t.service.model.S3Object;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,14 +17,14 @@ import java.util.List;
 public class DefaultFileUploader implements FileUploader {
   private S3Service s3Service;
   private List<S3Artifact> s3Artifacts;
-  private File outputFile;
+  private Path outputFile;
   private Log log;
 
   @Override
   public void init(UploadConfiguration config, Log log) {
     this.s3Service = config.newS3Service();
     this.s3Artifacts = new ArrayList<>();
-    this.outputFile = new File(config.getOutputFile());
+    this.outputFile = config.getOutputFile();
     this.log = log;
   }
 
@@ -52,7 +51,7 @@ public class DefaultFileUploader implements FileUploader {
   @Override
   public void destroy() throws MojoFailureException {
     try {
-      JsonHelper.writeArtifactsToJson(outputFile, s3Artifacts);
+      JsonHelper.writeArtifactsToJson(outputFile.toFile(), s3Artifacts);
     } catch (IOException e) {
       throw new MojoFailureException("Error writing dependencies json to file", e);
     }

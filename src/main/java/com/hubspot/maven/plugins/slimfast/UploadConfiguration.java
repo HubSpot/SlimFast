@@ -1,5 +1,7 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import java.nio.file.Path;
+
 import org.jets3t.service.S3Service;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
@@ -11,7 +13,7 @@ public class UploadConfiguration {
   private final String s3ArtifactRoot;
   private final String s3AccessKey;
   private final String s3SecretKey;
-  private final String outputFile;
+  private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
 
   public UploadConfiguration(String classpathPrefix,
@@ -20,7 +22,7 @@ public class UploadConfiguration {
                              String s3ArtifactRoot,
                              String s3AccessKey,
                              String s3SecretKey,
-                             String outputFile,
+                             Path outputFile,
                              boolean allowUnresolvedSnapshots) {
     this.classpathPrefix = classpathPrefix;
     this.repositoryPath = repositoryPath;
@@ -61,7 +63,7 @@ public class UploadConfiguration {
     return s3SecretKey;
   }
 
-  public String getOutputFile() {
+  public Path getOutputFile() {
     return outputFile;
   }
 

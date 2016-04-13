@@ -2,6 +2,7 @@ package com.hubspot.maven.plugins.slimfast;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +47,8 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     final DownloadConfiguration configuration = buildConfiguration();
+    FileHelper.ensureDirectoryExists(configuration.getCacheDirectory());
+
     Collection<S3Artifact> artifacts = readArtifacts();
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-download").setDaemon(true).build();
@@ -99,7 +102,7 @@ public class DownloadJarsMojo extends AbstractMojo {
   }
 
   private DownloadConfiguration buildConfiguration() {
-    return new DownloadConfiguration(cacheDirectory, s3AccessKey, s3SecretKey);
+    return new DownloadConfiguration(Paths.get(cacheDirectory), s3AccessKey, s3SecretKey);
   }
 
   private FileDownloader instantiateFileDownloader() throws MojoExecutionException {

@@ -17,6 +17,8 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.jar.Manifest;
 import org.codehaus.plexus.archiver.jar.ManifestException;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -80,6 +82,8 @@ public class UploadJarsMojo extends AbstractMojo {
     }
 
     final UploadConfiguration configuration = buildConfiguration();
+    FileHelper.ensureDirectoryExists(configuration.getOutputFile().getParent());
+
     Set<String> classpathEntries = getClasspathEntries();
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-upload").setDaemon(true).build();
@@ -132,7 +136,7 @@ public class UploadJarsMojo extends AbstractMojo {
         s3ArtifactRoot,
         s3AccessKey,
         s3SecretKey,
-        outputFile,
+        Paths.get(outputFile),
         allowUnresolvedSnapshots
     );
   }

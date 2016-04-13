@@ -1,15 +1,17 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import java.nio.file.Path;
+
 import org.jets3t.service.S3Service;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 
 public class DownloadConfiguration {
-  private final String cacheDirectory;
+  private final Path cacheDirectory;
   private final String s3AccessKey;
   private final String s3SecretKey;
 
-  public DownloadConfiguration(String cacheDirectory,
+  public DownloadConfiguration(Path cacheDirectory,
                                String s3AccessKey,
                                String s3SecretKey) {
     this.cacheDirectory = cacheDirectory;
@@ -22,7 +24,7 @@ public class DownloadConfiguration {
     return new RestS3Service(credentials);
   }
 
-  public String getCacheDirectory() {
+  public Path getCacheDirectory() {
     return cacheDirectory;
   }
 
