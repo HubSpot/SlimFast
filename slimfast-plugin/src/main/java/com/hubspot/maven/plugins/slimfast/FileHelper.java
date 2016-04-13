@@ -32,7 +32,7 @@ public class FileHelper {
 
   public static long size(Path path) throws MojoExecutionException {
     try {
-      return java.nio.file.Files.size(path);
+      return Files.size(path);
     } catch (IOException e) {
       throw new MojoExecutionException("Error reading file at path: " + path, e);
     }
