@@ -2,8 +2,6 @@ package com.hubspot.maven.plugins.slimfast;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -15,8 +13,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.archiver.ManifestConfiguration;
-import org.apache.maven.archiver.MavenArchiver;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,8 +22,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.archiver.jar.Manifest;
-import org.codehaus.plexus.archiver.jar.ManifestException;
 
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -84,7 +78,7 @@ public class UploadJarsMojo extends AbstractMojo {
     final UploadConfiguration configuration = buildConfiguration();
     FileHelper.ensureDirectoryExists(configuration.getOutputFile().getParent());
 
-    Set<String> classpathEntries = getClasspathEntries();
+    Set<String> classpathEntries = ManifestHelper.getClasspathEntries(manifestConfiguration, project, session);
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-upload").setDaemon(true).build();
     ExecutorService executor = Executors.newFixedThreadPool(s3UploadThreads, threadFactory);
@@ -139,25 +133,6 @@ public class UploadJarsMojo extends AbstractMojo {
         Paths.get(outputFile),
         allowUnresolvedSnapshots
     );
-  }
-
-  private Set<String> getClasspathEntries() throws MojoExecutionException {
-    manifestConfiguration.setAddClasspath(true);
-    manifestConfiguration.setClasspathPrefix("");
-
-    final Manifest manifest;
-    try {
-      MavenArchiver archiver = new MavenArchiver();
-      manifest = archiver.getManifest(session, project, manifestConfiguration);
-    } catch (ManifestException | DependencyResolutionRequiredException e) {
-      throw new MojoExecutionException("Error building manifest", e);
-    }
-
-    Set<String> classpathEntries = new HashSet<>();
-    String classpath = manifest.getMainAttributes().getValue("Class-Path");
-    classpathEntries.addAll(Arrays.asList(classpath.split(" ")));
-
-    return classpathEntries;
   }
 
   private FileUploader instantiateFileUploader() throws MojoExecutionException {
