@@ -5,9 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.archiver.ManifestConfiguration;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -49,8 +53,9 @@ public class CopyJarsMojo extends AbstractMojo {
     Path classpathPrefix = Paths.get(manifestConfiguration.getClasspathPrefix());
     Set<String> classpathEntries = ManifestHelper.getClasspathEntries(manifestConfiguration, project, session);
 
+    Map<String, Artifact> reactorArtifacts = findReactorArtifacts();
     for (String classpathEntry : classpathEntries) {
-      Path localPath = Paths.get(repositoryPath).resolve(classpathEntry);
+      Path localPath = locateClasspathEntry(classpathEntry, reactorArtifacts);
       Path targetPath = Paths.get(outputDirectory).resolve(classpathPrefix).resolve(classpathEntry);
       FileHelper.ensureDirectoryExists(targetPath.getParent());
 
@@ -59,6 +64,26 @@ public class CopyJarsMojo extends AbstractMojo {
       } catch (IOException e) {
         throw new MojoFailureException(String.format("Error moving file from %s to %s", localPath, targetPath), e);
       }
+    }
+  }
+
+  private Map<String, Artifact> findReactorArtifacts() {
+    Map<String, Artifact> reactorArtifacts = new HashMap<>();
+
+    for (Artifact artifact : project.getArtifacts()) {
+      if (artifact.getFile() != null && !artifact.getFile().toPath().startsWith(Paths.get(repositoryPath))) {
+        reactorArtifacts.put(new DefaultRepositoryLayout().pathOf(artifact), artifact);
+      }
+    }
+
+    return reactorArtifacts;
+  }
+
+  private Path locateClasspathEntry(String classpathEntry, Map<String, Artifact> reactorArtifacts) {
+    if (reactorArtifacts.containsKey(classpathEntry)) {
+      return reactorArtifacts.get(classpathEntry).getFile().toPath();
+    } else {
+      return Paths.get(repositoryPath).resolve(classpathEntry);
     }
   }
 }
