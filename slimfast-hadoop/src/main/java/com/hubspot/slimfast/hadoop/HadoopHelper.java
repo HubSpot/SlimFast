@@ -69,7 +69,7 @@ public class HadoopHelper {
         String classPath = manifest.getMainAttributes().getValue("Class-Path");
         if (classPath != null) {
           for (String jar : classPath.split(" ")) {
-            if (jarDirectory.resolve(jar).toFile().exists()) {
+            if (jarDirectory.resolve(jar).toFile().isFile()) {
               classpathJars.add(jar);
             }
           }
