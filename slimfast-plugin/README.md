@@ -60,6 +60,6 @@ Example of the copy goal:
   </build>
 ```
 
-It's very important that the `classpathPrefix` and ` classpathLayoutType` on the 
-maven-jar-plugin matches the values on the slimfast-plugin, otherwise the jars won't be where
-the JVM expects on startup and it won't be able to find any of the dependency classes.
+It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
+the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
+to find any of the dependency classes.
