@@ -4,7 +4,7 @@
 
 One place where uber jars can be convenient is for frameworks like Hadoop that ship your application jar around.
 If you build an uber jar, your dependencies automatically go along for the ride and everything works great. If
-you stop building an uber jar, however, you need manually handle this so that your dependencies are available
+you stop building an uber jar, however, you need to manually handle this so that your dependencies are available
 when the application starts up on the other side. 
 
 This microlibrary makes that easier by finding all of the dependency jars, writing them to HDFS (if they don't 
