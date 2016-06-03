@@ -6,7 +6,7 @@
 
 SlimFast is a tool for Java apps to help them stop building uber jars for deployment (massive jars containing
 all of the app's dependencies). Building uber jars is slow and adds a lot of complexity (custom merge strategies 
-when jars being merge have duplicate files for example). 
+when jars being merged have duplicate files for example). 
 
 The first part is the maven plugin, which can be used in place of the maven-assembly-plugin or maven-shade-plugin
 (which are often used to build uber jars). The other part is a helper library for hadoop to write each job's dependencies
