@@ -63,3 +63,7 @@ Example of the copy goal:
 **NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
 the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
 to find any of the dependency classes.
+
+Just using the copy goal has a lot of advantages and is a big win in its own right, but at HubSpot we tar up the
+build result and upload it to S3 so that it's available for deploys. And on deploy, we download this tar and expand
+it. 
