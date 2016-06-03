@@ -33,13 +33,23 @@ public class DefaultFileUploader implements FileUploader {
 
   @Override
   public void upload(UploadConfiguration config, String file) throws MojoExecutionException, MojoFailureException {
-    if (!config.isAllowUnresolvedSnapshots() && file.toUpperCase().endsWith("-SNAPSHOT.JAR")) {
-      throw new MojoExecutionException("Encountered unresolved snapshot: " + file);
+    boolean isUnresolvedSnapshot = file.toUpperCase().endsWith("-SNAPSHOT.JAR");
+
+    final String s3Key;
+    if (isUnresolvedSnapshot) {
+      if (config.isAllowUnresolvedSnapshots()) {
+        long timestamp = System.currentTimeMillis();
+        String start = file.substring(0, file.length() - ".JAR".length());
+        String end = file.substring(file.length() - ".JAR".length());
+        s3Key = start + "-" + timestamp + end;
+      } else {
+        throw new MojoExecutionException("Encountered unresolved snapshot: " + file);
+      }
+    } else {
+      s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(file).toString();
     }
 
-    String s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(file).toString();
-    Path localPath = Paths.get(config.getRepositoryPath()).resolve(file);
-
+    Path localPath = config.getArtifactLocator().locateClasspathEntry(file);
     if (keyExists(config.getS3Bucket(), s3Key)) {
       log.info("Key already exists " + s3Key);
     } else {

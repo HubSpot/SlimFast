@@ -124,8 +124,8 @@ public class UploadJarsMojo extends AbstractMojo {
 
   private UploadConfiguration buildConfiguration() {
     return new UploadConfiguration(
+        new ArtifactLocator(project, repositoryPath),
         Paths.get(manifestConfiguration.getClasspathPrefix()),
-        repositoryPath,
         s3Bucket,
         s3ArtifactRoot,
         s3AccessKey,
