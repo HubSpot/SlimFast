@@ -2,6 +2,15 @@
 
 ## Overview ##
 
+The slimfast-plugin can be used in place of the maven-assembly-plugin or maven-shade-plugin (which are often used to build 
+uber jars). In addition, if you configure the maven-jar-plugin in the right way, the resulting jar (although not an uber jar)
+will still be runnable using plain old `java -jar` (ie, without needing to manually construct the classpath). 
+
+This uses a feature of the JVM which is that if you run a jar which has a `Class-Path` entry in its manifest, then those 
+paths are added to the classpath of the JVM. Using this feature, we can tell the maven-jar-plugin to build the classpath 
+for us at build time and add it as a manifest property. Then we can configure the slimfast-plugin to copy the dependency 
+jars to the right place and the resulting jar will start up fine when run with `java -jar`.
+
 ## Usage ##
 
 The plugin has three goals: copy, upload, and download. Copy can be used to copy your dependencies to the target folder 
@@ -21,6 +30,7 @@ Example of the copy goal:
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
+              <mainClass>${your-main-class-property}</mainClass>
               <classpathPrefix>lib/</classpathPrefix>
               <classpathLayoutType>repository</classpathLayoutType>
             </manifest>
@@ -50,5 +60,6 @@ Example of the copy goal:
   </build>
 ```
 
-It's very important that the manifest configuration on the maven-jar-plugin matches the manifest
-configuration on the slimfast-plugin.
+It's very important that the `classpathPrefix` and ` classpathLayoutType` on the 
+maven-jar-plugin matches the values on the slimfast-plugin, otherwise the jars won't be where
+the JVM expects on startup and it won't be able to find any of the dependency classes.
