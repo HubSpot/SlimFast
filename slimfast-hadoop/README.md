@@ -16,7 +16,7 @@ improved our hadoop job launch speeds.
 ## Usage ##
 
 First you build a `SlimfastHadoopConfiguration`. This contains the path to the main application jar, the root
-folder on hdfs you want to use to store dependency jars (defaults to "/jars" if not specified), and the Hadoop 
+folder on hdfs you want to use to store dependency jars (defaults to `/jars` if not specified), and the Hadoop 
 `Configuration`. Then you pass this configuration to the `HadoopHelper` which finds all the dependency jars, 
 writes them to HDFS, and adds them to the job's classpath. A minimal invocation would look like:
 
