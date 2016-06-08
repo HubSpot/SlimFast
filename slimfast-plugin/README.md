@@ -18,7 +18,7 @@ The plugin has three goals: `copy`, `upload`, and `download`.
 `copy` can be used to copy your dependencies to the target folder so they're available at runtime ([Example](#copy-goal)).
 This is similar to the `copy-dependencies` goal of the `maven-dependency-plugin`, but we were unable to get that to work 
 with a repository layout combined with resolved snapshot versions (the `useBaseVersion` flag seems to get ignored when the
-`useRepositoryLayout` flag is set). Using the `copy` goal saves you the time of buildingan uber jar and eliminates the jar 
+`useRepositoryLayout` flag is set). Using the `copy` goal saves you the time of building an uber jar and eliminates the jar 
 merging complexities, but it doesn't reduce the size of your build artifacts.
 
 Just using the `copy` goal has a lot of advantages and is a big win in its own right, but there's still room for improvement.
