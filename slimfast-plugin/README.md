@@ -15,54 +15,7 @@ jars to the right place and the resulting jar will start up fine when run with `
 
 The plugin has three goals: `copy`, `upload`, and `download`. `copy` can be used to copy your dependencies to the target 
 folder so they're available at runtime. This saves you the time of building an uber jar and removes the jar merging 
-complexities, but it doesn't reduce the size of your build artifacts.
-
-Example of the `copy` goal:
-
-```xml
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>${your-main-class-property}</mainClass>
-              <classpathPrefix>lib/</classpathPrefix>
-              <classpathLayoutType>repository</classpathLayoutType>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.hubspot.maven.plugins</groupId>
-        <artifactId>slimfast-plugin</artifactId>
-        <version>0.10</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <manifest>
-                <classpathPrefix>lib/</classpathPrefix>
-                <classpathLayoutType>repository</classpathLayoutType>
-              </manifest>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-```
-
-**NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
-the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
-to find any of the dependency classes.
+complexities, but it doesn't reduce the size of your build artifacts ([Example]()).
 
 Just using the `copy` goal has a lot of advantages and is a big win in its own right, but there's still room for improvement.
 At HubSpot, for example, we tar up the build directory and upload it to S3 at the end of the build. Then we download and 
@@ -192,3 +145,52 @@ Then you could invoke SlimFast like this:
     </plugins>
   </build>
 ```
+
+## Examples ##
+
+### Copy Goal ###
+
+```xml
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${your-main-class-property}</mainClass>
+              <classpathPrefix>lib/</classpathPrefix>
+              <classpathLayoutType>repository</classpathLayoutType>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.hubspot.maven.plugins</groupId>
+        <artifactId>slimfast-plugin</artifactId>
+        <version>0.10</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <manifest>
+                <classpathPrefix>lib/</classpathPrefix>
+                <classpathLayoutType>repository</classpathLayoutType>
+              </manifest>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+```
+
+**NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
+the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
+to find any of the dependency classes.
