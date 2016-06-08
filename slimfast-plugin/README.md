@@ -33,6 +33,10 @@ already exist in S3, so after the initial build this step should mostly be a no-
 
 ## Examples ##
 
+**NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
+the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
+to find any of the dependency classes.
+
 ### Copy Goal ###
 
 ```xml
@@ -75,10 +79,6 @@ already exist in S3, so after the initial build this step should mostly be a no-
     </plugins>
   </build>
 ```
-
-**NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
-the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
-to find any of the dependency classes.
 
 ### Upload Goal ###
 
