@@ -13,11 +13,11 @@ jars to the right place and the resulting jar will start up fine when run with `
 
 ## Usage ##
 
-The plugin has three goals: copy, upload, and download. Copy can be used to copy your dependencies to the target folder 
-so they're available at runtime. This saves you the time of building an uber jar and removes the jar merging 
+The plugin has three goals: `copy`, `upload`, and `download`. `copy` can be used to copy your dependencies to the target 
+folder so they're available at runtime. This saves you the time of building an uber jar and removes the jar merging 
 complexities, but it doesn't reduce the size of your build artifacts.
 
-Example of the copy goal:
+Example of the `copy` goal:
 
 ```xml
   <build>
@@ -64,6 +64,10 @@ Example of the copy goal:
 the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
 to find any of the dependency classes.
 
-Just using the copy goal has a lot of advantages and is a big win in its own right, but at HubSpot we tar up the
-build result and upload it to S3 so that it's available for deploys. And on deploy, we download this tar and expand
-it. 
+Just using the `copy` goal has a lot of advantages and is a big win in its own right, but there's still room for improvement.
+At HubSpot, for example, we tar up the build directory and upload it to S3 at the end of the build. Then we download and 
+untar it on the application servers when someone wants to deploy. Using the `copy` goal doesn't reduce the size of these 
+tarballs so we're still uploading the same amount to S3 on build and downloading the same amount on deploy. This adds 
+time to builds and deploys, uses up lots of bandwidth, and costs money for storing these large artifacts in S3. 
+
+But fear not! This is what the `upload` and `download` goals are for. 
