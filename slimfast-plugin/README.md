@@ -15,7 +15,7 @@ jars to the right place and the resulting jar will start up fine when run with `
 
 The plugin has three goals: `copy`, `upload`, and `download`. `copy` can be used to copy your dependencies to the target 
 folder so they're available at runtime. This saves you the time of building an uber jar and removes the jar merging 
-complexities, but it doesn't reduce the size of your build artifacts ([Example]()).
+complexities, but it doesn't reduce the size of your build artifacts ([Example](#copy-goal)).
 
 Just using the `copy` goal has a lot of advantages and is a big win in its own right, but there's still room for improvement.
 At HubSpot, for example, we tar up the build directory and upload it to S3 at the end of the build. Then we download and 
