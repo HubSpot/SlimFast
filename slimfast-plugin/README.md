@@ -70,4 +70,125 @@ untar it on the application servers when someone wants to deploy. Using the `cop
 tarballs so we're still uploading the same amount to S3 on build and downloading the same amount on deploy. This adds 
 time to builds and deploys, uses up lots of bandwidth, and costs money for storing these large artifacts in S3. 
 
-But fear not! This is what the `upload` and `download` goals are for. 
+But fear not! This is what the `upload` and `download` goals are for. The `upload` goal binds to the deploy phase by default
+and will upload all of the project's dependencies to S3. It only uploads the dependency if it doesn't already exist in S3,
+so after the initial build this step should mostly be a no-op and go very fast.
+
+Example of the `upload` goal:
+
+```xml
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${your-main-class-property}</mainClass>
+              <classpathPrefix>lib/</classpathPrefix>
+              <classpathLayoutType>repository</classpathLayoutType>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.hubspot.maven.plugins</groupId>
+        <artifactId>slimfast-plugin</artifactId>
+        <version>0.10</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>upload</goal>
+            </goals>
+            <phase>deploy</phase>
+            <configuration>
+              <s3Bucket>my-bucket</s3Bucket>
+              <s3ArtifactRoot>jars</s3ArtifactRoot>
+              <s3AccessKey>abc</s3AccessKey>
+              <s3SecretKey>123</s3SecretKey>
+              <manifest>
+                <classpathPrefix>lib/</classpathPrefix>
+                <classpathLayoutType>repository</classpathLayoutType>
+              </manifest>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+```
+
+You probably don't want to hard-code these values in your pom though, instead you can use the `properties-maven-plugin`
+to read them from a file that is managed by puppet or your configuration management tool of choice. If you have
+a file located at `/etc/slimfast.properties` with contents like:
+
+```properties
+s3.bucket=my-bucket
+s3.artifact.root=jars
+s3.access.key=abc
+s3.secret.key=123
+```
+
+Then you could invoke SlimFast like this:
+
+```xml
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${your-main-class-property}</mainClass>
+              <classpathPrefix>lib/</classpathPrefix>
+              <classpathLayoutType>repository</classpathLayoutType>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <phase>initialize</phase>
+            <configuration>
+              <files>
+                <file>/etc/slimfast.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>      
+      <plugin>
+        <groupId>com.hubspot.maven.plugins</groupId>
+        <artifactId>slimfast-plugin</artifactId>
+        <version>0.10</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>upload</goal>
+            </goals>
+            <phase>deploy</phase>
+            <configuration>
+              <manifest>
+                <classpathPrefix>lib/</classpathPrefix>
+                <classpathLayoutType>repository</classpathLayoutType>
+              </manifest>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+```
