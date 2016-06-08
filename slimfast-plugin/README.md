@@ -15,7 +15,7 @@ jars to the right place and the resulting jar will start up fine when run with `
 
 The plugin has three goals: `copy`, `upload`, and `download`. 
 
-`copy` can be used to copy your dependencies to the target folder so they're available at runtime ([Example](#copy-goal)).
+`copy` can be used to copy your dependencies to the target folder so they're available at runtime ([example](#copy-goal)).
 This is similar to the `copy-dependencies` goal of the `maven-dependency-plugin`, but we were unable to get that to work 
 with a repository layout combined with resolved snapshot versions (the `useBaseVersion` flag seems to get ignored when the
 `useRepositoryLayout` flag is set). Using the `copy` goal saves you the time of building an uber jar and eliminates the jar 
@@ -28,7 +28,7 @@ tarballs so we're still uploading the same amount to S3 on build and downloading
 time to builds and deploys, uses lots of bandwidth, and costs money for storing these large artifacts in S3. 
 
 But fear not! This is what the `upload` and `download` goals are for. The `upload` goal binds to the deploy phase by default
-and will upload all of the project's dependencies to S3 [Example](#upload-goal). It only uploads a dependency if it doesn't 
+and will upload all of the project's dependencies to S3 ([example](#upload-goal)). It only uploads a dependency if it doesn't 
 already exist in S3, so after the initial build this step should mostly be a no-op and go very fast.
 
 ## Examples ##
