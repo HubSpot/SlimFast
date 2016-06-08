@@ -28,8 +28,8 @@ tarballs so we're still uploading the same amount to S3 on build and downloading
 time to builds and deploys, uses lots of bandwidth, and costs money for storing these large artifacts in S3. 
 
 But fear not! This is what the `upload` and `download` goals are for. The `upload` goal binds to the deploy phase by default
-and will upload all of the project's dependencies to S3. It only uploads a dependency if it doesn't already exist in S3,
-so after the initial build this step should mostly be a no-op and go very fast.
+and will upload all of the project's dependencies to S3 [Example](#upload-goal). It only uploads a dependency if it doesn't 
+already exist in S3, so after the initial build this step should mostly be a no-op and go very fast.
 
 ## Examples ##
 
