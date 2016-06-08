@@ -13,21 +13,74 @@ jars to the right place and the resulting jar will start up fine when run with `
 
 ## Usage ##
 
-The plugin has three goals: `copy`, `upload`, and `download`. `copy` can be used to copy your dependencies to the target 
-folder so they're available at runtime. This saves you the time of building an uber jar and removes the jar merging 
-complexities, but it doesn't reduce the size of your build artifacts ([Example](#copy-goal)).
+The plugin has three goals: `copy`, `upload`, and `download`. 
+
+`copy` can be used to copy your dependencies to the target folder so they're available at runtime ([Example](#copy-goal)).
+This is similar to the `copy-dependencies` goal of the `maven-dependency-plugin`, but we were unable to get that to work 
+with a repository layout combined with resolved snapshot versions (the `useBaseVersion` flag seems to get ignored when the
+`useRepositoryLayout` flag is set). Using the `copy` goal saves you the time of buildingan uber jar and eliminates the jar 
+merging complexities, but it doesn't reduce the size of your build artifacts.
 
 Just using the `copy` goal has a lot of advantages and is a big win in its own right, but there's still room for improvement.
 At HubSpot, for example, we tar up the build directory and upload it to S3 at the end of the build. Then we download and 
 untar it on the application servers when someone wants to deploy. Using the `copy` goal doesn't reduce the size of these 
 tarballs so we're still uploading the same amount to S3 on build and downloading the same amount on deploy. This adds 
-time to builds and deploys, uses up lots of bandwidth, and costs money for storing these large artifacts in S3. 
+time to builds and deploys, uses lots of bandwidth, and costs money for storing these large artifacts in S3. 
 
 But fear not! This is what the `upload` and `download` goals are for. The `upload` goal binds to the deploy phase by default
-and will upload all of the project's dependencies to S3. It only uploads the dependency if it doesn't already exist in S3,
+and will upload all of the project's dependencies to S3. It only uploads a dependency if it doesn't already exist in S3,
 so after the initial build this step should mostly be a no-op and go very fast.
 
-Example of the `upload` goal:
+## Examples ##
+
+### Copy Goal ###
+
+```xml
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${your-main-class-property}</mainClass>
+              <classpathPrefix>lib/</classpathPrefix>
+              <classpathLayoutType>repository</classpathLayoutType>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.hubspot.maven.plugins</groupId>
+        <artifactId>slimfast-plugin</artifactId>
+        <version>0.10</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <manifest>
+                <classpathPrefix>lib/</classpathPrefix>
+                <classpathLayoutType>repository</classpathLayoutType>
+              </manifest>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+```
+
+**NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
+the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
+to find any of the dependency classes.
+
+### Upload Goal ###
 
 ```xml
   <build>
@@ -145,52 +198,3 @@ Then you could invoke SlimFast like this:
     </plugins>
   </build>
 ```
-
-## Examples ##
-
-### Copy Goal ###
-
-```xml
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>${your-main-class-property}</mainClass>
-              <classpathPrefix>lib/</classpathPrefix>
-              <classpathLayoutType>repository</classpathLayoutType>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.hubspot.maven.plugins</groupId>
-        <artifactId>slimfast-plugin</artifactId>
-        <version>0.10</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <manifest>
-                <classpathPrefix>lib/</classpathPrefix>
-                <classpathLayoutType>repository</classpathLayoutType>
-              </manifest>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-```
-
-**NOTE:** It's very important that the `classpathPrefix` and ` classpathLayoutType` on the maven-jar-plugin match 
-the values on the slimfast-plugin, otherwise the jars won't be where the JVM expects and it won't be able 
-to find any of the dependency classes.
