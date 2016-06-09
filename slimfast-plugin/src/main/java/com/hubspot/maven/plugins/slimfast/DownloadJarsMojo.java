@@ -22,7 +22,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-@Mojo(name = "download", threadSafe = true)
+@Mojo(name = "download", requiresProject = false, threadSafe = true)
 public class DownloadJarsMojo extends AbstractMojo {
 
   @Parameter(property = "slimfast.fileDownloader", alias = "fileDownloader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileDownloader")
@@ -40,10 +40,10 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.cacheDirectory", defaultValue = "${settings.localRepository}")
   private String cacheDirectory;
 
-  @Parameter(property = "slimfast.outputDirectory", defaultValue = "${project.build.directory}")
+  @Parameter(property = "slimfast.outputDirectory", defaultValue = "target")
   private String outputDirectory;
 
-  @Parameter(property = "slimfast.inputFile", defaultValue = "${project.build.directory}/slimfast.json")
+  @Parameter(property = "slimfast.inputFile", defaultValue = "target/slimfast.json")
   private String inputFile;
 
   @Override
