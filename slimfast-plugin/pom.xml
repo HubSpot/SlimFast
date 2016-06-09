@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot.slimfast</groupId>
     <artifactId>slimfast-parent</artifactId>
-    <version>0.11</version>
+    <version>0.12-SNAPSHOT</version>
   </parent>
 
   <groupId>com.hubspot.maven.plugins</groupId>
