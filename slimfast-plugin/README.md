@@ -40,7 +40,7 @@ to the correct paths so that the application will start up with `java -jar`.
 
 Another option is to integrate this into your deployment phase, which is what we've done at HubSpot. Before using SlimFast,
 at build time we would generate a single S3 artifact and store its information in the database so that we can fetch it at deploy
-time. Now, we just have an array of S3 artifacts produced by the build (the main artifact, combined with the SlimFast artifacts
+time. Now, we just store an array of S3 artifacts produced by the build (the main artifact, combined with the SlimFast artifacts
 read from `target/slimfast.json`). At deploy time, [Singularity](https://github.com/HubSpot/Singularity) downloads all these S3
 artifacts for us so everything just works.
 
