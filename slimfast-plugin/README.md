@@ -33,10 +33,16 @@ already exist in S3, so after the initial build this step should mostly be a no-
 the files, it will write out a JSON file (`target/slimfast.json`) containing information that can be used later to download 
 the dependencies to the correct paths.
 
-The most straightforward way to use this JSON file is to run the `download` goal during your deployment step. This goal 
-doesn't require a project so it can run in standalone mode without a `pom.xml`. A minimal invocation would look like
-[this](#download-goal). It will download all of the project dependencies (determined by reading `target/slimfast.json`) 
+The most straightforward way to use this JSON file is to run the `download` goal on your application servers before startup. 
+This goal doesn't require a project so it can run in standalone mode without a `pom.xml`. A minimal invocation would look 
+like [this](#download-goal). It will download all of the project dependencies (determined by reading `target/slimfast.json`) 
 to the correct paths so that the application will start up with `java -jar`.
+
+Another option is to integrate this into your deployment phase, which is what we've done at HubSpot. Before using SlimFast,
+at build time we would generate a single S3 artifact and store its information in the database so that we can fetch it at deploy
+time. Now, we just have an array of S3 artifacts produced by the build (the main artifact, combined with the SlimFast artifacts
+read from `target/slimfast.json`). At deploy time, [Singularity](https://github.com/HubSpot/Singularity) downloads all these S3
+artifacts for us so everything just works.
 
 ## Examples ##
 
