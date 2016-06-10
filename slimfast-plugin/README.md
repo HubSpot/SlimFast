@@ -60,7 +60,7 @@ to find any of the dependency classes.
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.10</version>
+        <version>0.11</version>
         <executions>
           <execution>
             <goals>
@@ -103,7 +103,7 @@ to find any of the dependency classes.
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.10</version>
+        <version>0.11</version>
         <executions>
           <execution>
             <goals>
@@ -179,7 +179,7 @@ Then you could invoke SlimFast like this:
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.10</version>
+        <version>0.11</version>
         <executions>
           <execution>
             <goals>
