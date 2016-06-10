@@ -29,7 +29,14 @@ time to builds and deploys, uses lots of bandwidth, and costs money for storing 
 
 But fear not! This is what the `upload` and `download` goals are for. The `upload` goal binds to the deploy phase by default
 and will upload all of the project's dependencies to S3 ([example](#upload-goal)). It only uploads a dependency if it doesn't 
-already exist in S3, so after the initial build this step should mostly be a no-op and go very fast.
+already exist in S3, so after the initial build this step should mostly be a no-op and go very fast. When it's done uploading 
+the files, it will write out a JSON file (`target/slimfast.json`) containing information that can be used later to download 
+the dependencies to the correct paths.
+
+The most straightforward way to use this JSON file is to run the `download` goal during your deployment step. This goal 
+doesn't require a project so it can run in standalone mode without a `pom.xml`. A minimal invocation would look like
+[this](#download-goal). It will download all of the project dependencies (determined by reading `target/slimfast.json`) 
+to the correct paths so that the application will start up with `java -jar`.
 
 ## Examples ##
 
@@ -127,9 +134,9 @@ to find any of the dependency classes.
   </build>
 ```
 
-You probably don't want to hard-code these values in your pom though, instead you can use the `properties-maven-plugin`
-to read them from a file that is managed by puppet or your configuration management tool of choice. If you have
-a file located at `/etc/slimfast.properties` with contents like:
+You probably don't want to hard-code these S3 credentials in your pom though, instead you can use the 
+`properties-maven-plugin` to read them from a file that is managed by puppet or your configuration management 
+tool of choice. If you have a file located at `/etc/slimfast.properties` with contents like:
 
 ```properties
 s3.bucket=my-bucket
@@ -197,4 +204,10 @@ Then you could invoke SlimFast like this:
       </plugin>
     </plugins>
   </build>
+```
+
+### Download Goal ###
+
+```bash
+mvn com.hubspot.maven.plugins:slimfast-plugin:0.11-SNAPSHOT:download -Dslimfast.s3.accessKey=abc -Dslimfast.s3.secretKey=123
 ```
