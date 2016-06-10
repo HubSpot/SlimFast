@@ -79,7 +79,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     try {
       return JsonHelper.readArtifactsFromJson(new File(inputFile));
     } catch (IOException e) {
-      throw new MojoFailureException("Error writing dependencies json to file", e);
+      throw new MojoFailureException("Error reading dependencies from file", e);
     }
   }
 
