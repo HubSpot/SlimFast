@@ -1,9 +1,9 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -12,11 +12,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.maven.archiver.ManifestConfiguration;
+import org.apache.maven.configuration.BeanConfigurator;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -29,14 +30,14 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @Mojo(name = "upload", defaultPhase = LifecyclePhase.DEPLOY, threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class UploadJarsMojo extends AbstractMojo {
 
+  @Component
+  private BeanConfigurator beanConfigurator;
+
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
   @Parameter(defaultValue = "${session}", readonly = true, required = true)
   private MavenSession session;
-
-  @Parameter(alias = "manifest")
-  private ManifestConfiguration manifestConfiguration = new ManifestConfiguration();
 
   @Parameter(property = "slimfast.fileUploader", alias = "fileUploader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader")
   private String fileUploaderType;
@@ -75,10 +76,9 @@ public class UploadJarsMojo extends AbstractMojo {
       return;
     }
 
-    final UploadConfiguration configuration = buildConfiguration();
+    ClasspathConfiguration classpath = ManifestHelper.getClasspathConfiguration(beanConfigurator, project, session);
+    final UploadConfiguration configuration = buildConfiguration(classpath.getPrefix());
     FileHelper.ensureDirectoryExists(configuration.getOutputFile().getParent());
-
-    Set<String> classpathEntries = ManifestHelper.getClasspathEntries(manifestConfiguration, project, session);
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-upload").setDaemon(true).build();
     ExecutorService executor = Executors.newFixedThreadPool(s3UploadThreads, threadFactory);
@@ -86,7 +86,7 @@ public class UploadJarsMojo extends AbstractMojo {
     uploader.init(configuration, getLog());
 
     List<Future<?>> futures = new ArrayList<>();
-    for (final String classpathEntry : classpathEntries) {
+    for (final String classpathEntry : classpath.getEntries()) {
       futures.add(executor.submit(new Callable<Object>() {
 
         @Override
@@ -122,10 +122,10 @@ public class UploadJarsMojo extends AbstractMojo {
     }
   }
 
-  private UploadConfiguration buildConfiguration() {
+  private UploadConfiguration buildConfiguration(Path classpathPrefix) {
     return new UploadConfiguration(
         new ArtifactLocator(project, repositoryPath),
-        Paths.get(manifestConfiguration.getClasspathPrefix()),
+        classpathPrefix,
         s3Bucket,
         s3ArtifactRoot,
         s3AccessKey,
