@@ -76,8 +76,8 @@
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-archiver</artifactId>
-        <version>3.0.3</version>
+        <artifactId>plexus-interpolation</artifactId>
+        <version>1.22</version>
       </dependency>
       <dependency>
         <groupId>net.java.dev.jets3t</groupId>

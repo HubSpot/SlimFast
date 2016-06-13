@@ -7,8 +7,7 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 
 public class UploadConfiguration {
-  private final ArtifactLocator artifactLocator;
-  private final Path classpathPrefix;
+  private final Path prefix;
   private final String s3Bucket;
   private final String s3ArtifactRoot;
   private final String s3AccessKey;
@@ -16,16 +15,14 @@ public class UploadConfiguration {
   private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
 
-  public UploadConfiguration(ArtifactLocator artifactLocator,
-                             Path classpathPrefix,
+  public UploadConfiguration(Path prefix,
                              String s3Bucket,
                              String s3ArtifactRoot,
                              String s3AccessKey,
                              String s3SecretKey,
                              Path outputFile,
                              boolean allowUnresolvedSnapshots) {
-    this.artifactLocator = artifactLocator;
-    this.classpathPrefix = classpathPrefix;
+    this.prefix = prefix;
     this.s3Bucket = s3Bucket;
     this.s3ArtifactRoot = s3ArtifactRoot;
     this.s3AccessKey = s3AccessKey;
@@ -39,12 +36,8 @@ public class UploadConfiguration {
     return new RestS3Service(credentials);
   }
 
-  public ArtifactLocator getArtifactLocator() {
-    return artifactLocator;
-  }
-
-  public Path getClasspathPrefix() {
-    return classpathPrefix;
+  public Path getPrefix() {
+    return prefix;
   }
 
   public String getS3Bucket() {

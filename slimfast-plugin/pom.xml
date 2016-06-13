@@ -36,7 +36,7 @@
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-archiver</artifactId>
+      <artifactId>plexus-interpolation</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

@@ -21,7 +21,7 @@ import org.json.simple.parser.ParseException;
 
 public class JsonHelper {
 
-  public static void writeArtifactsToJson(File outputFile, ArtifactWrapper wrapper) throws IOException {
+  public static void writeArtifactsToJson(File outputFile, S3ArtifactWrapper wrapper) throws IOException {
     JSONObject json = new JSONObject();
 
     JSONArray artifacts = new JSONArray();
@@ -29,7 +29,7 @@ public class JsonHelper {
       artifacts.add(toJsonObject(artifact));
     }
 
-    json.put("classpathPrefix", wrapper.getClasspathPrefix());
+    json.put("prefix", wrapper.getPrefix());
     json.put("artifacts", artifacts);
 
     try (Writer writer = newWriter(outputFile)) {
@@ -38,20 +38,20 @@ public class JsonHelper {
     }
   }
 
-  public static ArtifactWrapper readArtifactsFromJson(File inputFile) throws IOException {
+  public static S3ArtifactWrapper readArtifactsFromJson(File inputFile) throws IOException {
     JSONParser parser = new JSONParser();
 
     try (Reader reader = newReader(inputFile)) {
       try {
         JSONObject parsed = (JSONObject) parser.parse(reader);
 
-        String classpathPrefix = (String) parsed.get("classpathPrefix");
+        String prefix = (String) parsed.get("prefix");
         Set<S3Artifact> artifacts = new LinkedHashSet<>();
         for (Object object : (JSONArray) parsed.get("artifacts")) {
           artifacts.add(fromJsonObject((JSONObject) object));
         }
 
-        return new ArtifactWrapper(classpathPrefix, artifacts);
+        return new S3ArtifactWrapper(prefix, artifacts);
       } catch (ParseException e) {
         throw new IOException(e);
       }

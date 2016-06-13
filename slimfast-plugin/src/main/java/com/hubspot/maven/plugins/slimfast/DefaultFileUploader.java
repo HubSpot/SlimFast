@@ -18,7 +18,7 @@ import org.jets3t.service.model.S3Object;
 public class DefaultFileUploader implements FileUploader {
   private S3Service s3Service;
   private Set<S3Artifact> s3Artifacts;
-  private Path classpathPrefix;
+  private Path prefix;
   private Path outputFile;
   private Log log;
 
@@ -26,13 +26,14 @@ public class DefaultFileUploader implements FileUploader {
   public void init(UploadConfiguration config, Log log) {
     this.s3Service = config.newS3Service();
     this.s3Artifacts = Collections.synchronizedSet(new LinkedHashSet<S3Artifact>());
-    this.classpathPrefix = config.getClasspathPrefix();
+    this.prefix = config.getPrefix();
     this.outputFile = config.getOutputFile();
     this.log = log;
   }
 
   @Override
-  public void upload(UploadConfiguration config, String file) throws MojoExecutionException, MojoFailureException {
+  public void upload(UploadConfiguration config, LocalArtifact artifact) throws MojoExecutionException, MojoFailureException {
+    String file = artifact.getLocalPath().toString();
     boolean isUnresolvedSnapshot = file.toUpperCase().endsWith("-SNAPSHOT.JAR");
 
     final String s3Key;
@@ -49,7 +50,7 @@ public class DefaultFileUploader implements FileUploader {
       s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(file).toString();
     }
 
-    Path localPath = config.getArtifactLocator().locateClasspathEntry(file);
+    Path localPath = artifact.getLocalPath();
     if (keyExists(config.getS3Bucket(), s3Key)) {
       log.info("Key already exists " + s3Key);
     } else {
@@ -57,14 +58,14 @@ public class DefaultFileUploader implements FileUploader {
       log.info("Successfully uploaded key " + s3Key);
     }
 
-    String targetPath = classpathPrefix.resolve(file).toString();
+    String targetPath = prefix.resolve(artifact.getTargetPath()).toString();
     s3Artifacts.add(new S3Artifact(config.getS3Bucket(), s3Key, targetPath, FileHelper.md5(localPath), FileHelper.size(localPath)));
   }
 
   @Override
   public void destroy() throws MojoFailureException {
     try {
-      JsonHelper.writeArtifactsToJson(outputFile.toFile(), new ArtifactWrapper(classpathPrefix.toString(), s3Artifacts));
+      JsonHelper.writeArtifactsToJson(outputFile.toFile(), new S3ArtifactWrapper(prefix.toString(), s3Artifacts));
     } catch (IOException e) {
       throw new MojoFailureException("Error writing dependencies json to file", e);
     }

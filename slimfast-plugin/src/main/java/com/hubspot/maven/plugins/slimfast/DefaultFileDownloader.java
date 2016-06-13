@@ -34,7 +34,7 @@ public class DefaultFileDownloader implements FileDownloader {
       return;
     }
 
-    Path cacheFile = cacheDirectory.resolve(config.getClasspathPrefix().relativize(Paths.get(artifact.getTargetPath())));
+    Path cacheFile = cacheDirectory.resolve(config.getPrefix().relativize(Paths.get(artifact.getTargetPath())));
     if (artifactIsCached(cacheFile, artifact)) {
       log.info("Target file is cached " + cacheFile);
     } else {

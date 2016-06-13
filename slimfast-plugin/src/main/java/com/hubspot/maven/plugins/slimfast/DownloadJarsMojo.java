@@ -40,7 +40,7 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.cacheDirectory", defaultValue = "${settings.localRepository}")
   private String cacheDirectory;
 
-  @Parameter(property = "slimfast.outputDirectory", defaultValue = "target")
+  @Parameter(property = "slimfast.outputDirectory", defaultValue = "")
   private String outputDirectory;
 
   @Parameter(property = "slimfast.inputFile", defaultValue = "target/slimfast.json")
@@ -48,9 +48,9 @@ public class DownloadJarsMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    ArtifactWrapper wrapper = readArtifactInfo();
+    S3ArtifactWrapper wrapper = readArtifactInfo();
 
-    final DownloadConfiguration configuration = buildConfiguration(wrapper.getClasspathPrefix());
+    final DownloadConfiguration configuration = buildConfiguration(wrapper.getPrefix());
     FileHelper.ensureDirectoryExists(configuration.getCacheDirectory());
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-download").setDaemon(true).build();
@@ -75,7 +75,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     downloader.destroy();
   }
 
-  private ArtifactWrapper readArtifactInfo() throws MojoFailureException {
+  private S3ArtifactWrapper readArtifactInfo() throws MojoFailureException {
     try {
       return JsonHelper.readArtifactsFromJson(new File(inputFile));
     } catch (IOException e) {
@@ -103,9 +103,9 @@ public class DownloadJarsMojo extends AbstractMojo {
     }
   }
 
-  private DownloadConfiguration buildConfiguration(String classpathPrefix) {
+  private DownloadConfiguration buildConfiguration(String prefix) {
     return new DownloadConfiguration(
-        Paths.get(classpathPrefix),
+        Paths.get(prefix),
         Paths.get(cacheDirectory),
         Paths.get(outputDirectory),
         s3AccessKey,

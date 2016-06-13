@@ -1,5 +1,7 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import static org.codehaus.plexus.PlexusTestCase.getBasedir;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -13,7 +15,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.configuration.BeanConfigurator;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -35,9 +36,6 @@ public class UploadJarsMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
-
-  @Parameter(defaultValue = "${session}", readonly = true, required = true)
-  private MavenSession session;
 
   @Parameter(property = "slimfast.fileUploader", alias = "fileUploader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader")
   private String fileUploaderType;
@@ -76,8 +74,8 @@ public class UploadJarsMojo extends AbstractMojo {
       return;
     }
 
-    ClasspathConfiguration classpath = ManifestHelper.getClasspathConfiguration(beanConfigurator, project, session);
-    final UploadConfiguration configuration = buildConfiguration(classpath.getPrefix());
+    LocalArtifactWrapper artifactWrapper = ArtifactHelper.getArtifactPaths(beanConfigurator, project);
+    final UploadConfiguration configuration = buildConfiguration(artifactWrapper.getPrefix());
     FileHelper.ensureDirectoryExists(configuration.getOutputFile().getParent());
 
     ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-upload").setDaemon(true).build();
@@ -86,12 +84,12 @@ public class UploadJarsMojo extends AbstractMojo {
     uploader.init(configuration, getLog());
 
     List<Future<?>> futures = new ArrayList<>();
-    for (final String classpathEntry : classpath.getEntries()) {
+    for (final LocalArtifact artifact : artifactWrapper.getArtifacts()) {
       futures.add(executor.submit(new Callable<Object>() {
 
         @Override
         public Object call() throws Exception {
-          uploader.upload(configuration, classpathEntry);
+          uploader.upload(configuration, artifact);
           return null;
         }
       }));
@@ -122,10 +120,9 @@ public class UploadJarsMojo extends AbstractMojo {
     }
   }
 
-  private UploadConfiguration buildConfiguration(Path classpathPrefix) {
+  private UploadConfiguration buildConfiguration(Path prefix) {
     return new UploadConfiguration(
-        new ArtifactLocator(project, repositoryPath),
-        classpathPrefix,
+        prefix,
         s3Bucket,
         s3ArtifactRoot,
         s3AccessKey,
