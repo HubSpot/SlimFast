@@ -40,7 +40,7 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.cacheDirectory", defaultValue = "${settings.localRepository}")
   private String cacheDirectory;
 
-  @Parameter(property = "slimfast.outputDirectory", defaultValue = "")
+  @Parameter(property = "slimfast.outputDirectory", defaultValue = "${basedir}")
   private String outputDirectory;
 
   @Parameter(property = "slimfast.inputFile", defaultValue = "target/slimfast.json")

@@ -33,7 +33,7 @@ public class DefaultFileUploader implements FileUploader {
 
   @Override
   public void upload(UploadConfiguration config, LocalArtifact artifact) throws MojoExecutionException, MojoFailureException {
-    String file = artifact.getLocalPath().toString();
+    String file = artifact.getTargetPath().toString();
     boolean isUnresolvedSnapshot = file.toUpperCase().endsWith("-SNAPSHOT.JAR");
 
     final String s3Key;
