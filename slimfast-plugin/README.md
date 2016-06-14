@@ -58,7 +58,6 @@ to find any of the dependency classes.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -73,19 +72,13 @@ to find any of the dependency classes.
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.11</version>
+        <version>0.12</version>
         <executions>
           <execution>
             <goals>
               <goal>copy</goal>
             </goals>
             <phase>package</phase>
-            <configuration>
-              <manifest>
-                <classpathPrefix>lib/</classpathPrefix>
-                <classpathLayoutType>repository</classpathLayoutType>
-              </manifest>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -101,7 +94,6 @@ to find any of the dependency classes.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -116,7 +108,7 @@ to find any of the dependency classes.
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.11</version>
+        <version>0.12</version>
         <executions>
           <execution>
             <goals>
@@ -128,10 +120,6 @@ to find any of the dependency classes.
               <s3ArtifactRoot>jars</s3ArtifactRoot>
               <s3AccessKey>abc</s3AccessKey>
               <s3SecretKey>123</s3SecretKey>
-              <manifest>
-                <classpathPrefix>lib/</classpathPrefix>
-                <classpathLayoutType>repository</classpathLayoutType>
-              </manifest>
             </configuration>
           </execution>
         </executions>
@@ -159,7 +147,6 @@ Then you could invoke SlimFast like this:
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -192,19 +179,13 @@ Then you could invoke SlimFast like this:
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.11</version>
+        <version>0.12</version>
         <executions>
           <execution>
             <goals>
               <goal>upload</goal>
             </goals>
             <phase>deploy</phase>
-            <configuration>
-              <manifest>
-                <classpathPrefix>lib/</classpathPrefix>
-                <classpathLayoutType>repository</classpathLayoutType>
-              </manifest>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -215,5 +196,5 @@ Then you could invoke SlimFast like this:
 ### Download Goal ###
 
 ```bash
-mvn com.hubspot.maven.plugins:slimfast-plugin:0.11-SNAPSHOT:download -Dslimfast.s3.accessKey=abc -Dslimfast.s3.secretKey=123
+mvn com.hubspot.maven.plugins:slimfast-plugin:0.12:download -Dslimfast.s3.accessKey=abc -Dslimfast.s3.secretKey=123
 ```
