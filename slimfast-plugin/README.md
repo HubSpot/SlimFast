@@ -3,7 +3,7 @@
 ## Overview ##
 
 The slimfast-plugin can be used in place of the maven-assembly-plugin or maven-shade-plugin (which are often used to build 
-uber jars). In addition, if you configure the maven-jar-plugin in the right way, the resulting jar (although not an uber jar)
+fat jars). In addition, if you configure the maven-jar-plugin in the right way, the resulting jar (although not a fat jar)
 will still be runnable using plain old `java -jar` (ie, without needing to manually construct the classpath). 
 
 This uses a feature of the JVM which is that if you run a jar which has a `Class-Path` entry in its manifest, then those 
@@ -18,7 +18,7 @@ The plugin has three goals: `copy`, `upload`, and `download`.
 `copy` can be used to copy your dependencies to the target folder so they're available at runtime ([example](#copy-goal)).
 This is similar to the `copy-dependencies` goal of the `maven-dependency-plugin`, but we were unable to get that to work 
 with a repository layout combined with resolved snapshot versions (the `useBaseVersion` flag seems to get ignored when the
-`useRepositoryLayout` flag is set). Using the `copy` goal saves you the time of building an uber jar and eliminates the jar 
+`useRepositoryLayout` flag is set). Using the `copy` goal saves you the time of building a fat jar and eliminates the jar 
 merging complexities, but it doesn't reduce the size of your build artifacts.
 
 Just using the `copy` goal has a lot of advantages and is a big win in its own right, but there's still room for improvement.
