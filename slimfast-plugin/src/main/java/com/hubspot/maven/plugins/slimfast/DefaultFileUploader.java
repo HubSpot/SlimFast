@@ -42,7 +42,7 @@ public class DefaultFileUploader implements FileUploader {
         long timestamp = System.currentTimeMillis();
         String start = file.substring(0, file.length() - ".JAR".length());
         String end = file.substring(file.length() - ".JAR".length());
-        s3Key = start + "-" + timestamp + end;
+        s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(start + "-" + timestamp + end).toString();
       } else {
         throw new MojoExecutionException("Encountered unresolved snapshot: " + file);
       }
