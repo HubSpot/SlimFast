@@ -21,6 +21,7 @@ public class DefaultFileUploader implements FileUploader {
   private Path prefix;
   private Path outputFile;
   private Log log;
+  private boolean onlyOutputJson;
 
   @Override
   public void init(UploadConfiguration config, Log log) {
@@ -28,6 +29,7 @@ public class DefaultFileUploader implements FileUploader {
     this.s3Artifacts = Collections.synchronizedSet(new LinkedHashSet<S3Artifact>());
     this.prefix = config.getPrefix();
     this.outputFile = config.getOutputFile();
+    this.onlyOutputJson = config.isOnlyOutputJson();
     this.log = log;
   }
 
@@ -51,11 +53,13 @@ public class DefaultFileUploader implements FileUploader {
     }
 
     Path localPath = artifact.getLocalPath();
-    if (keyExists(config.getS3Bucket(), s3Key)) {
-      log.info("Key already exists " + s3Key);
-    } else {
-      doUpload(config.getS3Bucket(), s3Key, localPath);
-      log.info("Successfully uploaded key " + s3Key);
+    if (!onlyOutputJson) {
+      if (keyExists(config.getS3Bucket(), s3Key)) {
+        log.info("Key already exists " + s3Key);
+      } else {
+        doUpload(config.getS3Bucket(), s3Key, localPath);
+        log.info("Successfully uploaded key " + s3Key);
+      }
     }
 
     String targetPath = prefix.resolve(artifact.getTargetPath()).toString();

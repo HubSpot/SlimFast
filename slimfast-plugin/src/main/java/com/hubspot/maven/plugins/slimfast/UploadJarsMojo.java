@@ -67,6 +67,9 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "false")
   private boolean allowUnresolvedSnapshots;
 
+  @Parameter(property = "slimfast.onlyOutputJson", defaultValue = "false")
+  private boolean onlyOutputJson;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
@@ -128,7 +131,8 @@ public class UploadJarsMojo extends AbstractMojo {
         s3AccessKey,
         s3SecretKey,
         Paths.get(outputFile),
-        allowUnresolvedSnapshots
+        allowUnresolvedSnapshots,
+        onlyOutputJson
     );
   }
 
