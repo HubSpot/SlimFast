@@ -1,7 +1,5 @@
 package com.hubspot.maven.plugins.slimfast;
 
-import static org.codehaus.plexus.PlexusTestCase.getBasedir;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,6 +28,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 @Mojo(name = "upload", defaultPhase = LifecyclePhase.DEPLOY, threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class UploadJarsMojo extends AbstractMojo {
+  private static final String DEFAULT_UPLOADER = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader";
+  private static final String DRY_RUN_UPLOADER = "com.hubspot.maven.plugins.slimfast.DryRunFileUploader";
 
   @Component
   private BeanConfigurator beanConfigurator;
@@ -37,7 +37,7 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
-  @Parameter(property = "slimfast.fileUploader", alias = "fileUploader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader")
+  @Parameter(property = "slimfast.fileUploader", alias = "fileUploader", defaultValue = DEFAULT_UPLOADER)
   private String fileUploaderType;
 
   @Parameter(property = "slimfast.s3.bucket", defaultValue = "${s3.bucket}", required = true)
@@ -66,6 +66,9 @@ public class UploadJarsMojo extends AbstractMojo {
 
   @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "false")
   private boolean allowUnresolvedSnapshots;
+
+  @Parameter(property = "slimfast.dryRun", defaultValue = "false")
+  private boolean dryRun;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -133,8 +136,19 @@ public class UploadJarsMojo extends AbstractMojo {
   }
 
   private FileUploader instantiateFileUploader() throws MojoExecutionException {
+    final String resolvedFileUploaderType;
+    if (dryRun) {
+      if (DEFAULT_UPLOADER.equals(fileUploaderType)) {
+        resolvedFileUploaderType = DRY_RUN_UPLOADER;
+      } else {
+        throw new MojoExecutionException("May not specify custom fileUploader when using the dryRun flag");
+      }
+    } else {
+      resolvedFileUploaderType = fileUploaderType;
+    }
+
     try {
-      return (FileUploader) Class.forName(fileUploaderType).newInstance();
+      return (FileUploader) Class.forName(resolvedFileUploaderType).newInstance();
     } catch (ClassNotFoundException e) {
       throw new MojoExecutionException("Unable to find file uploader implementation", e);
     } catch (InstantiationException | IllegalAccessException e) {
