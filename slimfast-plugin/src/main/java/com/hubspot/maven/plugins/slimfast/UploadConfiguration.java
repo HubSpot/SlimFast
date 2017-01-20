@@ -14,6 +14,7 @@ public class UploadConfiguration {
   private final String s3SecretKey;
   private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
+  private final boolean onlyOutputJson;
 
   public UploadConfiguration(Path prefix,
                              String s3Bucket,
@@ -21,7 +22,8 @@ public class UploadConfiguration {
                              String s3AccessKey,
                              String s3SecretKey,
                              Path outputFile,
-                             boolean allowUnresolvedSnapshots) {
+                             boolean allowUnresolvedSnapshots,
+                             boolean onlyOutputJson) {
     this.prefix = prefix;
     this.s3Bucket = s3Bucket;
     this.s3ArtifactRoot = s3ArtifactRoot;
@@ -29,6 +31,7 @@ public class UploadConfiguration {
     this.s3SecretKey = s3SecretKey;
     this.outputFile = outputFile;
     this.allowUnresolvedSnapshots = allowUnresolvedSnapshots;
+    this.onlyOutputJson = onlyOutputJson;
   }
 
   public S3Service newS3Service() {
@@ -62,5 +65,9 @@ public class UploadConfiguration {
 
   public boolean isAllowUnresolvedSnapshots() {
     return allowUnresolvedSnapshots;
+  }
+
+  public boolean isOnlyOutputJson() {
+    return onlyOutputJson;
   }
 }
