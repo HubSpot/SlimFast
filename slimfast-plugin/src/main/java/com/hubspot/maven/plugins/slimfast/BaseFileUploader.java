@@ -37,15 +37,16 @@ public abstract class BaseFileUploader implements FileUploader {
   @Override
   public void upload(UploadConfiguration config, LocalArtifact artifact) throws MojoExecutionException, MojoFailureException {
     String file = artifact.getTargetPath().toString();
+    Path localPath = artifact.getLocalPath();
     boolean isUnresolvedSnapshot = file.toUpperCase().endsWith("-SNAPSHOT.JAR");
 
     final String s3Key;
     if (isUnresolvedSnapshot) {
       if (config.isAllowUnresolvedSnapshots()) {
-        long timestamp = System.currentTimeMillis();
         String start = file.substring(0, file.length() - ".JAR".length());
         String end = file.substring(file.length() - ".JAR".length());
-        s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(start + "-" + timestamp + end).toString();
+        String md5 = FileHelper.md5(localPath);
+        s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(start + "-" + md5 + end).toString();
       } else {
         throw new MojoExecutionException("Encountered unresolved snapshot: " + file);
       }
@@ -53,7 +54,6 @@ public abstract class BaseFileUploader implements FileUploader {
       s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(file).toString();
     }
 
-    Path localPath = artifact.getLocalPath();
     doUpload(config.getS3Bucket(), s3Key, localPath);
 
     String targetPath = prefix.resolve(artifact.getTargetPath()).toString();
