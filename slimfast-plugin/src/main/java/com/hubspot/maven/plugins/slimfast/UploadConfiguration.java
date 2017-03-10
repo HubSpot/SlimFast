@@ -2,10 +2,6 @@ package com.hubspot.maven.plugins.slimfast;
 
 import java.nio.file.Path;
 
-import org.jets3t.service.S3Service;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.security.AWSCredentials;
-
 public class UploadConfiguration {
   private final Path prefix;
   private final String s3Bucket;
@@ -29,11 +25,6 @@ public class UploadConfiguration {
     this.s3SecretKey = s3SecretKey;
     this.outputFile = outputFile;
     this.allowUnresolvedSnapshots = allowUnresolvedSnapshots;
-  }
-
-  public S3Service newS3Service() {
-    AWSCredentials credentials = new AWSCredentials(getS3AccessKey(), getS3SecretKey());
-    return new RestS3Service(credentials);
   }
 
   public Path getPrefix() {

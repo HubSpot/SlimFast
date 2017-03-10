@@ -2,9 +2,7 @@ package com.hubspot.maven.plugins.slimfast;
 
 import java.nio.file.Path;
 
-import org.jets3t.service.S3Service;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.security.AWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
 
 public class DownloadConfiguration {
   private final Path prefix;
@@ -23,11 +21,6 @@ public class DownloadConfiguration {
     this.outputDirectory = outputDirectory;
     this.s3AccessKey = s3AccessKey;
     this.s3SecretKey = s3SecretKey;
-  }
-
-  public S3Service newS3Service() {
-    AWSCredentials credentials = new AWSCredentials(getS3AccessKey(), getS3SecretKey());
-    return new RestS3Service(credentials);
   }
 
   public Path getPrefix() {

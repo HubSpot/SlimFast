@@ -10,18 +10,19 @@ import java.nio.file.StandardCopyOption;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.jets3t.service.S3Service;
-import org.jets3t.service.ServiceException;
-import org.jets3t.service.model.S3Object;
+
+import com.amazonaws.SdkBaseException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
 
 public class DefaultFileDownloader implements FileDownloader {
-  private S3Service s3Service;
+  private AmazonS3 s3Service;
   private Path cacheDirectory;
   private Log log;
 
   @Override
   public void init(DownloadConfiguration config, Log log) {
-    this.s3Service = config.newS3Service();
+    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey());
     this.cacheDirectory = config.getCacheDirectory();
     this.log = log;
   }
@@ -54,13 +55,7 @@ public class DefaultFileDownloader implements FileDownloader {
   }
 
   @Override
-  public void destroy() throws MojoExecutionException, MojoFailureException {
-    try {
-      s3Service.shutdown();
-    } catch (ServiceException e) {
-      throw new MojoFailureException("Error closing S3Service", e);
-    }
-  }
+  public void destroy() throws MojoExecutionException, MojoFailureException {}
 
   private boolean artifactIsCached(Path path, S3Artifact artifact) throws MojoExecutionException {
     return Files.exists(path) && checksumsMatch(path, artifact);
@@ -71,10 +66,10 @@ public class DefaultFileDownloader implements FileDownloader {
 
     try {
       S3Object s3Object = s3Service.getObject(bucket, key);
-      try (InputStream input = s3Object.getDataInputStream()) {
+      try (InputStream input = s3Object.getObjectContent()) {
         Files.copy(input, tempPath, StandardCopyOption.REPLACE_EXISTING);
       }
-    } catch (ServiceException e) {
+    } catch (SdkBaseException e) {
       throw new MojoFailureException("Error downloading key " + key, e);
     } catch (IOException e) {
       throw new MojoFailureException("Error downloading to file " + tempPath, e);

@@ -1,23 +1,23 @@
 package com.hubspot.maven.plugins.slimfast;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.jets3t.service.S3Service;
-import org.jets3t.service.ServiceException;
-import org.jets3t.service.impl.rest.HttpException;
-import org.jets3t.service.model.S3Object;
+
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkBaseException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.services.s3.AmazonS3;
 
 public class DefaultFileUploader extends BaseFileUploader {
-  private S3Service s3Service;
+  private AmazonS3 s3Service;
   private Log log;
 
   @Override
   protected void doInit(UploadConfiguration config, Log log) {
-    this.s3Service = config.newS3Service();
+    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey());
     this.log = log;
   }
 
@@ -28,41 +28,26 @@ public class DefaultFileUploader extends BaseFileUploader {
       return;
     }
 
-    S3Object s3Object = new S3Object(key);
-    s3Object.setDataInputFile(path.toFile());
     try {
-      s3Object.setContentLength(java.nio.file.Files.size(path));
-    } catch (IOException e) {
-      throw new MojoExecutionException("Error reading file at path: " + path, e);
-    }
-
-    try {
-      s3Service.putObject(bucket, s3Object);
+      s3Service.putObject(bucket, key, path.toFile());
       log.info("Successfully uploaded key " + key);
-    } catch (ServiceException e) {
+    } catch (SdkClientException e) {
       throw new MojoFailureException("Error uploading file " + path, e);
     }
   }
 
   @Override
-  protected void doDestroy() throws MojoFailureException {
-    try {
-      s3Service.shutdown();
-    } catch (ServiceException e) {
-      throw new MojoFailureException("Error closing S3Service", e);
-    }
-  }
+  protected void doDestroy() throws MojoFailureException {}
 
   private boolean keyExists(String bucket, String key) throws MojoFailureException {
     try {
-      s3Service.getObjectDetails(bucket, key);
+      s3Service.getObjectMetadata(bucket, key);
       return true;
-    } catch (ServiceException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof HttpException && ((HttpException) cause).getResponseCode() == 404) {
+    } catch (SdkBaseException e) {
+      if (e instanceof AmazonServiceException && ((AmazonServiceException) e).getStatusCode() == 404) {
         return false;
       } else {
-        throw new MojoFailureException("Error getting object details for key " + key, e);
+        throw new MojoFailureException("Error getting object metadata for key " + key, e);
       }
     }
   }

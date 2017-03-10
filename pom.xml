@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>15.1</version>
+    <version>15.9</version>
   </parent>
 
   <groupId>com.hubspot.slimfast</groupId>
@@ -32,9 +32,7 @@
   </prerequisites>
 
   <properties>
-    <dep.guava.version>18.0</dep.guava.version>
-
-    <snappy.version>0.4</snappy.version>
+    <aws.sdk.version>1.11.98</aws.sdk.version>
   </properties>
 
   <modules>
@@ -80,23 +78,14 @@
         <version>1.22</version>
       </dependency>
       <dependency>
-        <groupId>net.java.dev.jets3t</groupId>
-        <artifactId>jets3t</artifactId>
-        <version>0.9.4</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-          </exclusion>
-        </exclusions>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-s3</artifactId>
+        <version>${aws.sdk.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hubspot</groupId>
+        <artifactId>failsafe-s3-decorator</artifactId>
+        <version>0.7</version>
       </dependency>
       <dependency>
         <groupId>com.googlecode.json-simple</groupId>
