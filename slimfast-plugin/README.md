@@ -68,7 +68,7 @@ artifacts for us so everything just works.
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.17</version>
+        <version>0.18</version>
         <executions>
           <execution>
             <goals>
@@ -104,7 +104,7 @@ artifacts for us so everything just works.
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.17</version>
+        <version>0.18</version>
         <executions>
           <execution>
             <goals>
@@ -175,7 +175,7 @@ Then you could invoke SlimFast like this:
       <plugin>
         <groupId>com.hubspot.maven.plugins</groupId>
         <artifactId>slimfast-plugin</artifactId>
-        <version>0.17</version>
+        <version>0.18</version>
         <executions>
           <execution>
             <goals>
