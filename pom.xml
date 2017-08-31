@@ -10,7 +10,7 @@
 
   <groupId>com.hubspot.slimfast</groupId>
   <artifactId>slimfast-parent</artifactId>
-  <version>0.18-SNAPSHOT</version>
+  <version>0.19-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <scm>
