@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot.slimfast</groupId>
     <artifactId>slimfast-parent</artifactId>
-    <version>0.15</version>
+    <version>0.16-SNAPSHOT</version>
   </parent>
 
   <artifactId>slimfast-hadoop</artifactId>
