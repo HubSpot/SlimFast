@@ -10,14 +10,14 @@
 
   <groupId>com.hubspot.slimfast</groupId>
   <artifactId>slimfast-parent</artifactId>
-  <version>0.16-SNAPSHOT</version>
+  <version>0.16</version>
   <packaging>pom</packaging>
 
   <scm>
     <connection>scm:git:git@github.com:HubSpot/SlimFast.git</connection>
     <developerConnection>scm:git:git@github.com:HubSpot/SlimFast.git</developerConnection>
     <url>git@github.com:HubSpot/SlimFast.git</url>
-    <tag>HEAD</tag>
+    <tag>slimfast-parent-0.16</tag>
   </scm>
 
   <developers>
