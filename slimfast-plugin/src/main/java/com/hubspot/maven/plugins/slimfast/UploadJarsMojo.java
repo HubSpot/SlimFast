@@ -52,6 +52,9 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
   private String s3SecretKey;
 
+  @Parameter(property = "slimfast.s3.endpoint", defaultValue = "${s3.endpoint}", required = false)
+  private String s3Endpoint;
+
   @Parameter(property = "slimfast.s3.uploadThreads", defaultValue = "10")
   private int s3UploadThreads;
 
@@ -130,7 +133,7 @@ public class UploadJarsMojo extends AbstractMojo {
         s3ArtifactRoot,
         s3AccessKey,
         s3SecretKey,
-        Paths.get(outputFile),
+            s3Endpoint, Paths.get(outputFile),
         allowUnresolvedSnapshots
     );
   }

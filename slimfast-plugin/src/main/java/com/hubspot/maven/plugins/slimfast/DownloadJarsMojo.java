@@ -34,6 +34,9 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
   private String s3SecretKey;
 
+  @Parameter(property = "slimfast.s3.endpoint", defaultValue = "${s3.endpoint.key}", required = false)
+  private String s3Endpoint;
+
   @Parameter(property = "slimfast.s3.downloadThreads", defaultValue = "10")
   private int s3DownloadThreads;
 
@@ -109,7 +112,8 @@ public class DownloadJarsMojo extends AbstractMojo {
         Paths.get(cacheDirectory),
         Paths.get(outputDirectory),
         s3AccessKey,
-        s3SecretKey
+        s3SecretKey,
+        s3Endpoint
     );
   }
 

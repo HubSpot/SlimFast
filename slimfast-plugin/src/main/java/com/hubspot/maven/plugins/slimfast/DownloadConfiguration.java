@@ -10,17 +10,20 @@ public class DownloadConfiguration {
   private final Path outputDirectory;
   private final String s3AccessKey;
   private final String s3SecretKey;
+  private final String s3Endpoint;
 
   public DownloadConfiguration(Path prefix,
                                Path cacheDirectory,
                                Path outputDirectory,
                                String s3AccessKey,
-                               String s3SecretKey) {
+                               String s3SecretKey,
+                               String s3Endpoint) {
     this.prefix = prefix;
     this.cacheDirectory = cacheDirectory;
     this.outputDirectory = outputDirectory;
     this.s3AccessKey = s3AccessKey;
     this.s3SecretKey = s3SecretKey;
+    this.s3Endpoint = s3Endpoint;
   }
 
   public Path getPrefix() {
@@ -41,5 +44,9 @@ public class DownloadConfiguration {
 
   public String getS3SecretKey() {
     return s3SecretKey;
+  }
+
+  public String getS3Endpoint(){
+    return s3Endpoint;
   }
 }

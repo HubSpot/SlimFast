@@ -22,7 +22,7 @@ public class DefaultFileDownloader implements FileDownloader {
 
   @Override
   public void init(DownloadConfiguration config, Log log) {
-    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey());
+    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey(),config.getS3Endpoint());
     this.cacheDirectory = config.getCacheDirectory();
     this.log = log;
   }

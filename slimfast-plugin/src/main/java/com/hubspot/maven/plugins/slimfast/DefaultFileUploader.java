@@ -17,7 +17,7 @@ public class DefaultFileUploader extends BaseFileUploader {
 
   @Override
   protected void doInit(UploadConfiguration config, Log log) {
-    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey());
+    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey(),config.getS3Endpoint());
     this.log = log;
   }
 

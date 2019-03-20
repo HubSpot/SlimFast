@@ -8,6 +8,7 @@ public class UploadConfiguration {
   private final String s3ArtifactRoot;
   private final String s3AccessKey;
   private final String s3SecretKey;
+  private final String s3Endpoint;
   private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
 
@@ -16,13 +17,14 @@ public class UploadConfiguration {
                              String s3ArtifactRoot,
                              String s3AccessKey,
                              String s3SecretKey,
-                             Path outputFile,
+                             String s3Endpoint, Path outputFile,
                              boolean allowUnresolvedSnapshots) {
     this.prefix = prefix;
     this.s3Bucket = s3Bucket;
     this.s3ArtifactRoot = s3ArtifactRoot;
     this.s3AccessKey = s3AccessKey;
     this.s3SecretKey = s3SecretKey;
+    this.s3Endpoint = s3Endpoint;
     this.outputFile = outputFile;
     this.allowUnresolvedSnapshots = allowUnresolvedSnapshots;
   }
@@ -45,6 +47,10 @@ public class UploadConfiguration {
 
   public String getS3SecretKey() {
     return s3SecretKey;
+  }
+
+  public String getS3Endpoint() {
+    return s3Endpoint;
   }
 
   public Path getOutputFile() {
