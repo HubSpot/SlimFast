@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>15.9</version>
+    <version>25.3</version>
   </parent>
 
   <groupId>com.hubspot.slimfast</groupId>
@@ -13,34 +13,20 @@
   <version>0.20-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <scm>
-    <connection>scm:git:git@github.com:HubSpot/SlimFast.git</connection>
-    <developerConnection>scm:git:git@github.com:HubSpot/SlimFast.git</developerConnection>
-    <url>git@github.com:HubSpot/SlimFast.git</url>
-    <tag>HEAD</tag>
-  </scm>
-
-  <developers>
-    <developer>
-      <name>Jonathan Haber</name>
-      <email>jhaber@hubspot.com</email>
-    </developer>
-  </developers>
-
   <prerequisites>
     <maven>3</maven>
   </prerequisites>
+
+  <modules>
+    <module>slimfast-plugin</module>
+    <module>slimfast-hadoop</module>
+  </modules>
 
   <properties>
     <aws.sdk.version>1.11.461</aws.sdk.version>
     <dep.httpclient.version>4.5.5</dep.httpclient.version>
     <dep.httpcore.version>4.4.9</dep.httpcore.version>
   </properties>
-
-  <modules>
-    <module>slimfast-plugin</module>
-    <module>slimfast-hadoop</module>
-  </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -119,4 +105,18 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <developers>
+    <developer>
+      <name>Jonathan Haber</name>
+      <email>jhaber@hubspot.com</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:HubSpot/SlimFast.git</connection>
+    <developerConnection>scm:git:git@github.com:HubSpot/SlimFast.git</developerConnection>
+    <url>git@github.com:HubSpot/SlimFast.git</url>
+    <tag>HEAD</tag>
+  </scm>
 </project>
