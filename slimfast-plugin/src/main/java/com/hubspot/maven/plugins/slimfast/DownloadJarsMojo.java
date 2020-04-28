@@ -34,6 +34,9 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
   private String s3SecretKey;
 
+  @Parameter(property = "slimfast.s3.uploadThreads", defaultValue = "10")
+  private int s3UploadThreads;
+
   @Parameter(property = "slimfast.s3.downloadThreads", defaultValue = "10")
   private int s3DownloadThreads;
 
