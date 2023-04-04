@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.wavefront.slimfast</groupId>
     <artifactId>slimfast-parent</artifactId>
-    <version>0.20-SNAPSHOT</version>
+    <version>0.20</version>
   </parent>
 
   <groupId>com.wavefront.maven.plugins</groupId>
