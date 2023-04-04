@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.hubspot.slimfast</groupId>
+    <groupId>com.wavefront.slimfast</groupId>
     <artifactId>slimfast-parent</artifactId>
     <version>0.20-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.hubspot.maven.plugins</groupId>
+  <groupId>com.wavefront.maven.plugins</groupId>
   <artifactId>slimfast-plugin</artifactId>
   <packaging>maven-plugin</packaging>
 
