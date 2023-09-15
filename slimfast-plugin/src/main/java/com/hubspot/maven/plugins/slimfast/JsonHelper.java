@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,6 +27,23 @@ public class JsonHelper {
 
     JSONArray artifacts = new JSONArray();
     for (S3Artifact artifact : wrapper.getArtifacts()) {
+      artifacts.add(toJsonObject(artifact));
+    }
+
+    json.put("prefix", wrapper.getPrefix());
+    json.put("artifacts", artifacts);
+
+    try (Writer writer = newWriter(outputFile)) {
+      json.writeJSONString(writer);
+      writer.flush();
+    }
+  }
+
+  public static void writeArtifactsToJson(File outputFile, PreparedArtifactWrapper wrapper) throws IOException {
+    JSONObject json = new JSONObject();
+
+    JSONArray artifacts = new JSONArray();
+    for (PreparedArtifact artifact : wrapper.getArtifacts()) {
       artifacts.add(toJsonObject(artifact));
     }
 
@@ -52,6 +70,26 @@ public class JsonHelper {
         }
 
         return new S3ArtifactWrapper(prefix, artifacts);
+      } catch (ParseException e) {
+        throw new IOException(e);
+      }
+    }
+  }
+
+  public static PreparedArtifactWrapper readPreparedArtifactsFromJson(File inputFile) throws IOException {
+    JSONParser parser = new JSONParser();
+
+    try (Reader reader = newReader(inputFile)) {
+      try {
+        JSONObject parsed = (JSONObject) parser.parse(reader);
+
+        String prefix = (String) parsed.get("prefix");
+        Set<PreparedArtifact> artifacts = new LinkedHashSet<>();
+        for (Object object : (JSONArray) parsed.get("artifacts")) {
+          artifacts.add(preparedArtifactFromJsonObject((JSONObject) object));
+        }
+
+        return new PreparedArtifactWrapper(prefix, artifacts);
       } catch (ParseException e) {
         throw new IOException(e);
       }
@@ -88,4 +126,21 @@ public class JsonHelper {
 
     return new S3Artifact(bucket, key, targetPath, md5, size);
   }
+
+  private static JSONObject toJsonObject(PreparedArtifact preparedArtifact) {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("localPath", preparedArtifact.getLocalPath());
+    jsonObject.put("targetPath", preparedArtifact.getTargetPath());
+
+    return jsonObject;
+  }
+
+  private static PreparedArtifact preparedArtifactFromJsonObject(JSONObject jsonObject) {
+    String localPath = (String) jsonObject.get("localPath");
+    String targetPath = (String) jsonObject.get("targetPath");
+
+    return new PreparedArtifact(localPath, targetPath);
+  }
+
+
 }
