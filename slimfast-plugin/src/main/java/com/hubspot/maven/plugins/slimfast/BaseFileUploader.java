@@ -11,7 +11,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 
-public abstract class BaseFileUploader implements FileUploader {
+public abstract class BaseFileUploader implements FileUploader, FromManifestUploader {
   private Set<S3Artifact> s3Artifacts;
   private Path prefix;
   private Path outputFile;
@@ -36,8 +36,19 @@ public abstract class BaseFileUploader implements FileUploader {
 
   @Override
   public void upload(UploadConfiguration config, LocalArtifact artifact) throws MojoExecutionException, MojoFailureException {
-    String file = artifact.getTargetPath().toString();
-    Path localPath = artifact.getLocalPath();
+    upload(config, artifact.getTargetPath(), artifact.getLocalPath());
+  }
+
+  @Override
+  public void uploadFromManifest(UploadConfiguration config, PreparedArtifact artifact) throws MojoExecutionException, MojoFailureException {
+    Path targetPath = Paths.get(artifact.getTargetPath());
+    Path localPath = Paths.get(artifact.getLocalPath());
+
+    upload(config, targetPath, localPath);
+  }
+
+  private void upload(UploadConfiguration config, Path targetPath, Path localPath) throws MojoExecutionException, MojoFailureException {
+    String file = targetPath.toString();
     boolean isUnresolvedSnapshot = file.toUpperCase().endsWith("-SNAPSHOT.JAR");
 
     final String s3Key;
@@ -56,8 +67,8 @@ public abstract class BaseFileUploader implements FileUploader {
 
     doUpload(config.getS3Bucket(), s3Key, localPath);
 
-    String targetPath = prefix.resolve(artifact.getTargetPath()).toString();
-    s3Artifacts.add(new S3Artifact(config.getS3Bucket(), s3Key, targetPath, FileHelper.md5(localPath), FileHelper.size(localPath)));
+    String targetPathAsString = prefix.resolve(targetPath).toString();
+    s3Artifacts.add(new S3Artifact(config.getS3Bucket(), s3Key, targetPathAsString, FileHelper.md5(localPath), FileHelper.size(localPath)));
   }
 
   @Override
