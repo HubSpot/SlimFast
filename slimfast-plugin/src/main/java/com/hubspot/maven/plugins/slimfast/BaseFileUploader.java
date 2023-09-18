@@ -67,7 +67,7 @@ public abstract class BaseFileUploader implements FileUploader, FromManifestUplo
 
     doUpload(config.getS3Bucket(), s3Key, localPath);
 
-    String targetPathAsString = targetPath.toString();
+    String targetPathAsString = prefix.resolve(targetPath).toString();
     s3Artifacts.add(new S3Artifact(config.getS3Bucket(), s3Key, targetPathAsString, FileHelper.md5(localPath), FileHelper.size(localPath)));
   }
 

@@ -140,7 +140,7 @@ public class UploadFromManifestMojo extends AbstractMojo {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new MojoExecutionException("Unable to instantiate file uploader", e);
         } catch (ClassCastException e) {
-            throw new MojoExecutionException("Must implement FileUploader interface", e);
+            throw new MojoExecutionException("Must implement FromManifestUploader interface", e);
         }
     }
 }
