@@ -23,7 +23,7 @@
   </modules>
 
   <properties>
-    <aws.sdk.version>1.11.461</aws.sdk.version>
+    <aws.sdk.version>1.12.261</aws.sdk.version>
     <dep.httpclient.version>4.5.5</dep.httpclient.version>
     <dep.httpcore.version>4.4.9</dep.httpcore.version>
   </properties>
