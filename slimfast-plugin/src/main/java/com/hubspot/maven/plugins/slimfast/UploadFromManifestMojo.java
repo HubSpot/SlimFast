@@ -62,6 +62,11 @@ public class UploadFromManifestMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping plugin execution");
+            return;
+        }
+
         final PreparedArtifactWrapper preparedArtifactWrapper;
         try {
             preparedArtifactWrapper = JsonHelper.readPreparedArtifactsFromJson(Paths.get(manifestFile).toFile());
