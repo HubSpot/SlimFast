@@ -20,7 +20,7 @@ public class S3Factory {
         .withClientConfiguration(
             new ClientConfiguration()
                 .withConnectionTimeout(2_000)
-                .withRequestTimeout(5_000)
+                .withSocketTimeout(5_000)
                 .withMaxErrorRetry(5)
         )
         .build();

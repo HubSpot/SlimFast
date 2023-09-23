@@ -131,7 +131,8 @@ public class UploadJarsMojo extends AbstractMojo {
         s3AccessKey,
         s3SecretKey,
         Paths.get(outputFile),
-        allowUnresolvedSnapshots
+        allowUnresolvedSnapshots,
+        s3UploadThreads
     );
   }
 

@@ -10,6 +10,7 @@ public class UploadConfiguration {
   private final String s3SecretKey;
   private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
+  private final int uploadThreads;
 
   public UploadConfiguration(Path prefix,
                              String s3Bucket,
@@ -17,7 +18,8 @@ public class UploadConfiguration {
                              String s3AccessKey,
                              String s3SecretKey,
                              Path outputFile,
-                             boolean allowUnresolvedSnapshots) {
+                             boolean allowUnresolvedSnapshots,
+                             int uploadThreads) {
     this.prefix = prefix;
     this.s3Bucket = s3Bucket;
     this.s3ArtifactRoot = s3ArtifactRoot;
@@ -25,6 +27,7 @@ public class UploadConfiguration {
     this.s3SecretKey = s3SecretKey;
     this.outputFile = outputFile;
     this.allowUnresolvedSnapshots = allowUnresolvedSnapshots;
+    this.uploadThreads = uploadThreads;
   }
 
   public Path getPrefix() {
@@ -53,5 +56,9 @@ public class UploadConfiguration {
 
   public boolean isAllowUnresolvedSnapshots() {
     return allowUnresolvedSnapshots;
+  }
+
+  public int getUploadThreads() {
+    return uploadThreads;
   }
 }
