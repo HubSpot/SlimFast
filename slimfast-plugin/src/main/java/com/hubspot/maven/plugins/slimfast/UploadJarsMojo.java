@@ -46,10 +46,10 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.s3.artifactPrefix", defaultValue = "${s3.artifact.root}", required = true)
   private String s3ArtifactRoot;
 
-  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}", required = true)
+  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}")
   private String s3AccessKey;
 
-  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
+  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}")
   private String s3SecretKey;
 
   @Parameter(property = "slimfast.s3.uploadThreads", defaultValue = "10")
