@@ -15,14 +15,15 @@ public class S3Factory {
 
   public static AmazonS3 create(String accessKey, String secretKey) {
     AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-    return AmazonS3ClientBuilder.standard()
-        .withCredentials(new AWSStaticCredentialsProvider(credentials))
-        .withClientConfiguration(
-            new ClientConfiguration()
-                .withConnectionTimeout(2_000)
-                .withRequestTimeout(5_000)
-                .withMaxErrorRetry(5)
-        )
-        .build();
+    return AmazonS3ClientBuilder
+      .standard()
+      .withCredentials(new AWSStaticCredentialsProvider(credentials))
+      .withClientConfiguration(
+        new ClientConfiguration()
+          .withConnectionTimeout(2_000)
+          .withRequestTimeout(5_000)
+          .withMaxErrorRetry(5)
+      )
+      .build();
   }
 }

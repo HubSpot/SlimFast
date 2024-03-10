@@ -3,6 +3,7 @@ package com.hubspot.maven.plugins.slimfast;
 import java.util.Set;
 
 public class S3ArtifactWrapper {
+
   private final String prefix;
   private final Set<S3Artifact> artifacts;
 

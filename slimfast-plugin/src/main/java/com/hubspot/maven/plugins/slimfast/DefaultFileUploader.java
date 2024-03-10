@@ -1,17 +1,16 @@
 package com.hubspot.maven.plugins.slimfast;
 
-import java.nio.file.Path;
-
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkBaseException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import java.nio.file.Path;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 
 public class DefaultFileUploader extends BaseFileUploader {
+
   private AmazonS3 s3Service;
   private Log log;
 
@@ -22,7 +21,8 @@ public class DefaultFileUploader extends BaseFileUploader {
   }
 
   @Override
-  protected void doUpload(String bucket, String key, Path path) throws MojoFailureException, MojoExecutionException {
+  protected void doUpload(String bucket, String key, Path path)
+    throws MojoFailureException, MojoExecutionException {
     if (keyExists(bucket, key)) {
       log.info("Key already exists " + key);
       return;
@@ -44,7 +44,10 @@ public class DefaultFileUploader extends BaseFileUploader {
       s3Service.getObjectMetadata(bucket, key);
       return true;
     } catch (SdkBaseException e) {
-      if (e instanceof AmazonServiceException && ((AmazonServiceException) e).getStatusCode() == 404) {
+      if (
+        e instanceof AmazonServiceException &&
+        ((AmazonServiceException) e).getStatusCode() == 404
+      ) {
         return false;
       } else {
         throw new MojoFailureException("Error getting object metadata for key " + key, e);

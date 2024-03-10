@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,7 +21,8 @@ import org.json.simple.parser.ParseException;
 
 public class JsonHelper {
 
-  public static void writeArtifactsToJson(File outputFile, S3ArtifactWrapper wrapper) throws IOException {
+  public static void writeArtifactsToJson(File outputFile, S3ArtifactWrapper wrapper)
+    throws IOException {
     JSONObject json = new JSONObject();
 
     JSONArray artifacts = new JSONArray();
@@ -39,7 +39,10 @@ public class JsonHelper {
     }
   }
 
-  public static void writeArtifactsToJson(File outputFile, PreparedArtifactWrapper wrapper) throws IOException {
+  public static void writeArtifactsToJson(
+    File outputFile,
+    PreparedArtifactWrapper wrapper
+  ) throws IOException {
     JSONObject json = new JSONObject();
 
     JSONArray artifacts = new JSONArray();
@@ -56,7 +59,8 @@ public class JsonHelper {
     }
   }
 
-  public static S3ArtifactWrapper readArtifactsFromJson(File inputFile) throws IOException {
+  public static S3ArtifactWrapper readArtifactsFromJson(File inputFile)
+    throws IOException {
     JSONParser parser = new JSONParser();
 
     try (Reader reader = newReader(inputFile)) {
@@ -76,7 +80,8 @@ public class JsonHelper {
     }
   }
 
-  public static PreparedArtifactWrapper readPreparedArtifactsFromJson(File inputFile) throws IOException {
+  public static PreparedArtifactWrapper readPreparedArtifactsFromJson(File inputFile)
+    throws IOException {
     JSONParser parser = new JSONParser();
 
     try (Reader reader = newReader(inputFile)) {
@@ -98,12 +103,16 @@ public class JsonHelper {
 
   private static Writer newWriter(File file) throws IOException {
     FileOutputStream outputStream = new FileOutputStream(file);
-    return new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+    return new BufferedWriter(
+      new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+    );
   }
 
   private static Reader newReader(File file) throws IOException {
     FileInputStream outputStream = new FileInputStream(file);
-    return new BufferedReader(new InputStreamReader(outputStream, StandardCharsets.UTF_8));
+    return new BufferedReader(
+      new InputStreamReader(outputStream, StandardCharsets.UTF_8)
+    );
   }
 
   private static JSONObject toJsonObject(S3Artifact artifact) {
@@ -141,6 +150,4 @@ public class JsonHelper {
 
     return new PreparedArtifact(localPath, targetPath);
   }
-
-
 }

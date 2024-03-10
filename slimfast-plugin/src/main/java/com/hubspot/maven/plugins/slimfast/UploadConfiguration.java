@@ -3,6 +3,7 @@ package com.hubspot.maven.plugins.slimfast;
 import java.nio.file.Path;
 
 public class UploadConfiguration {
+
   private final Path prefix;
   private final String s3Bucket;
   private final String s3ArtifactRoot;
@@ -11,13 +12,15 @@ public class UploadConfiguration {
   private final Path outputFile;
   private final boolean allowUnresolvedSnapshots;
 
-  public UploadConfiguration(Path prefix,
-                             String s3Bucket,
-                             String s3ArtifactRoot,
-                             String s3AccessKey,
-                             String s3SecretKey,
-                             Path outputFile,
-                             boolean allowUnresolvedSnapshots) {
+  public UploadConfiguration(
+    Path prefix,
+    String s3Bucket,
+    String s3ArtifactRoot,
+    String s3AccessKey,
+    String s3SecretKey,
+    Path outputFile,
+    boolean allowUnresolvedSnapshots
+  ) {
     this.prefix = prefix;
     this.s3Bucket = s3Bucket;
     this.s3ArtifactRoot = s3ArtifactRoot;

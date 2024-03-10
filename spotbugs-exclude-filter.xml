@@ -1,0 +1,12 @@
+<FindBugsFilter>
+    <Match>
+        <!-- Class is not instantiable -->
+        <Class name="com.hubspot.maven.plugins.slimfast.S3Factory"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+    <Match>
+        <!-- New noisy checks introduced in spotbugs -->
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>
+

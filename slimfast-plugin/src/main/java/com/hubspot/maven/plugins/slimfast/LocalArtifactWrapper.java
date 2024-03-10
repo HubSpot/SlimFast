@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 public class LocalArtifactWrapper {
+
   private final Path prefix;
   private final Set<LocalArtifact> artifacts;
 
