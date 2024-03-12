@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 public class ClasspathConfiguration {
+
   private final Path prefix;
   private final Set<String> entries;
 

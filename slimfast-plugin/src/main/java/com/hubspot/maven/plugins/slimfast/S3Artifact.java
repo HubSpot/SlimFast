@@ -3,6 +3,7 @@ package com.hubspot.maven.plugins.slimfast;
 import java.util.Objects;
 
 public class S3Artifact {
+
   private final String bucket;
   private final String key;
   private final String targetPath;
@@ -48,11 +49,13 @@ public class S3Artifact {
     }
 
     S3Artifact artifact = (S3Artifact) o;
-    return Objects.equals(size, artifact.size) &&
-        Objects.equals(bucket, artifact.bucket) &&
-        Objects.equals(key, artifact.key) &&
-        Objects.equals(targetPath, artifact.targetPath) &&
-        Objects.equals(md5, artifact.md5);
+    return (
+      Objects.equals(size, artifact.size) &&
+      Objects.equals(bucket, artifact.bucket) &&
+      Objects.equals(key, artifact.key) &&
+      Objects.equals(targetPath, artifact.targetPath) &&
+      Objects.equals(md5, artifact.md5)
+    );
   }
 
   @Override

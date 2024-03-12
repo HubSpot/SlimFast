@@ -1,23 +1,24 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import com.google.common.hash.Hashing;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import javax.annotation.Nullable;
-
 import org.apache.maven.plugin.MojoExecutionException;
-
-import com.google.common.hash.Hashing;
 
 public class FileHelper {
 
-  public static void ensureDirectoryExists(@Nullable Path path) throws MojoExecutionException {
+  public static void ensureDirectoryExists(@Nullable Path path)
+    throws MojoExecutionException {
     if (path != null && !Files.exists(path)) {
       try {
         Files.createDirectories(path);
       } catch (IOException e) {
-        throw new MojoExecutionException("Error creating parent directories for path " + path, e);
+        throw new MojoExecutionException(
+          "Error creating parent directories for path " + path,
+          e
+        );
       }
     }
   }

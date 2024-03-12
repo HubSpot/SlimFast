@@ -1,5 +1,7 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.maven.configuration.BeanConfigurator;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -23,13 +24,18 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-@Mojo(name = "upload", defaultPhase = LifecyclePhase.DEPLOY, threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(
+  name = "upload",
+  defaultPhase = LifecyclePhase.DEPLOY,
+  threadSafe = true,
+  requiresDependencyResolution = ResolutionScope.RUNTIME
+)
 public class UploadJarsMojo extends AbstractMojo {
-  private static final String DEFAULT_UPLOADER = "com.hubspot.maven.plugins.slimfast.DefaultFileUploader";
-  private static final String DRY_RUN_UPLOADER = "com.hubspot.maven.plugins.slimfast.DryRunFileUploader";
+
+  private static final String DEFAULT_UPLOADER =
+    "com.hubspot.maven.plugins.slimfast.DefaultFileUploader";
+  private static final String DRY_RUN_UPLOADER =
+    "com.hubspot.maven.plugins.slimfast.DryRunFileUploader";
 
   @Component
   private BeanConfigurator beanConfigurator;
@@ -37,31 +43,57 @@ public class UploadJarsMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
-  @Parameter(property = "slimfast.fileUploader", alias = "fileUploader", defaultValue = DEFAULT_UPLOADER)
+  @Parameter(
+    property = "slimfast.fileUploader",
+    alias = "fileUploader",
+    defaultValue = DEFAULT_UPLOADER
+  )
   private String fileUploaderType;
 
-  @Parameter(property = "slimfast.s3.bucket", defaultValue = "${s3.bucket}", required = true)
+  @Parameter(
+    property = "slimfast.s3.bucket",
+    defaultValue = "${s3.bucket}",
+    required = true
+  )
   private String s3Bucket;
 
-  @Parameter(property = "slimfast.s3.artifactPrefix", defaultValue = "${s3.artifact.root}", required = true)
+  @Parameter(
+    property = "slimfast.s3.artifactPrefix",
+    defaultValue = "${s3.artifact.root}",
+    required = true
+  )
   private String s3ArtifactRoot;
 
-  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}", required = true)
+  @Parameter(
+    property = "slimfast.s3.accessKey",
+    defaultValue = "${s3.access.key}",
+    required = true
+  )
   private String s3AccessKey;
 
-  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
+  @Parameter(
+    property = "slimfast.s3.secretKey",
+    defaultValue = "${s3.secret.key}",
+    required = true
+  )
   private String s3SecretKey;
 
   @Parameter(property = "slimfast.s3.uploadThreads", defaultValue = "10")
   private int s3UploadThreads;
 
-  @Parameter(property = "slimfast.repositoryPath", defaultValue = "${settings.localRepository}")
+  @Parameter(
+    property = "slimfast.repositoryPath",
+    defaultValue = "${settings.localRepository}"
+  )
   private String repositoryPath;
 
   @Parameter(property = "slimfast.plugin.skip", defaultValue = "false")
   private boolean skip;
 
-  @Parameter(property = "slimfast.outputFile", defaultValue = "${project.build.directory}/slimfast.json")
+  @Parameter(
+    property = "slimfast.outputFile",
+    defaultValue = "${project.build.directory}/slimfast.json"
+  )
   private String outputFile;
 
   @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "false")
@@ -77,25 +109,39 @@ public class UploadJarsMojo extends AbstractMojo {
       return;
     }
 
-    LocalArtifactWrapper artifactWrapper = ArtifactHelper.getArtifactPaths(beanConfigurator, project);
-    final UploadConfiguration configuration = buildConfiguration(artifactWrapper.getPrefix());
+    LocalArtifactWrapper artifactWrapper = ArtifactHelper.getArtifactPaths(
+      beanConfigurator,
+      project
+    );
+    final UploadConfiguration configuration = buildConfiguration(
+      artifactWrapper.getPrefix()
+    );
     FileHelper.ensureDirectoryExists(configuration.getOutputFile().getParent());
 
-    ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-upload").setDaemon(true).build();
-    ExecutorService executor = Executors.newFixedThreadPool(s3UploadThreads, threadFactory);
+    ThreadFactory threadFactory = new ThreadFactoryBuilder()
+      .setNameFormat("slimfast-upload")
+      .setDaemon(true)
+      .build();
+    ExecutorService executor = Executors.newFixedThreadPool(
+      s3UploadThreads,
+      threadFactory
+    );
     final FileUploader uploader = instantiateFileUploader();
     uploader.init(configuration, getLog());
 
     List<Future<?>> futures = new ArrayList<>();
     for (final LocalArtifact artifact : artifactWrapper.getArtifacts()) {
-      futures.add(executor.submit(new Callable<Object>() {
-
-        @Override
-        public Object call() throws Exception {
-          uploader.upload(configuration, artifact);
-          return null;
-        }
-      }));
+      futures.add(
+        executor.submit(
+          new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+              uploader.upload(configuration, artifact);
+              return null;
+            }
+          }
+        )
+      );
     }
 
     executor.shutdown();
@@ -103,7 +149,8 @@ public class UploadJarsMojo extends AbstractMojo {
     uploader.destroy();
   }
 
-  private void waitForUploadsToFinish(ExecutorService executor, List<Future<?>> futures) throws MojoExecutionException, MojoFailureException {
+  private void waitForUploadsToFinish(ExecutorService executor, List<Future<?>> futures)
+    throws MojoExecutionException, MojoFailureException {
     try {
       if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
         getLog().error("Took more than 5 minutes to upload files, quitting");
@@ -112,7 +159,6 @@ public class UploadJarsMojo extends AbstractMojo {
 
       for (Future<?> future : futures) {
         future.get();
-
       }
     } catch (InterruptedException e) {
       throw new MojoExecutionException("Interrupted", e);
@@ -125,13 +171,13 @@ public class UploadJarsMojo extends AbstractMojo {
 
   private UploadConfiguration buildConfiguration(Path prefix) {
     return new UploadConfiguration(
-        prefix,
-        s3Bucket,
-        s3ArtifactRoot,
-        s3AccessKey,
-        s3SecretKey,
-        Paths.get(outputFile),
-        allowUnresolvedSnapshots
+      prefix,
+      s3Bucket,
+      s3ArtifactRoot,
+      s3AccessKey,
+      s3SecretKey,
+      Paths.get(outputFile),
+      allowUnresolvedSnapshots
     );
   }
 
@@ -141,7 +187,9 @@ public class UploadJarsMojo extends AbstractMojo {
       if (DEFAULT_UPLOADER.equals(fileUploaderType)) {
         resolvedFileUploaderType = DRY_RUN_UPLOADER;
       } else {
-        throw new MojoExecutionException("May not specify custom fileUploader when using the dryRun flag");
+        throw new MojoExecutionException(
+          "May not specify custom fileUploader when using the dryRun flag"
+        );
       }
     } else {
       resolvedFileUploaderType = fileUploaderType;
