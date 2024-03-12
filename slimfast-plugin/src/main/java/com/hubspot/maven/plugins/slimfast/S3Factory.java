@@ -6,9 +6,11 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class S3Factory {
 
+  @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
   private S3Factory() {
     throw new AssertionError();
   }
