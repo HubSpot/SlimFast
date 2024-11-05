@@ -105,7 +105,10 @@ public class DefaultFileUploader extends BaseFileUploader {
             if (ex instanceof NoSuchKeyException) {
               return Optional.empty();
             } else if (ex != null) {
-              throw new RuntimeException("Error getting object metadata for key: " + key);
+              throw new RuntimeException(
+                "Error getting object metadata for key: " + key,
+                ex
+              );
             } else {
               return Optional.of(key);
             }
