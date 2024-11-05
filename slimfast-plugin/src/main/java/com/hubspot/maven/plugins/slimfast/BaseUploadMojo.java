@@ -43,7 +43,7 @@ public abstract class BaseUploadMojo extends AbstractMojo {
   )
   private String s3SecretKey;
 
-  @Parameter(property = "slimfast.s3.region")
+  @Parameter(property = "slimfast.s3.region", defaultValue = "${s3.region}")
   private String s3Region;
 
   @Parameter(property = "slimfast.dryRun", defaultValue = "false")
