@@ -55,7 +55,7 @@ public class JsonHelper {
       artifacts.add(toJsonObject(artifact));
     }
 
-    json.put("prefix", wrapper.getPrefix());
+    json.put("prefix", wrapper.getPrefix().toString());
     json.put("artifacts", artifacts);
 
     try (Writer writer = newWriter(outputFile)) {
