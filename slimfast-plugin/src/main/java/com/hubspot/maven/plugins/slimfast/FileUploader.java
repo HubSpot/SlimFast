@@ -1,11 +1,12 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import java.io.Closeable;
+import java.util.Set;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 
-public interface FileUploader {
-  void init(UploadConfiguration config, Log log) throws MojoExecutionException, MojoFailureException;
-  void upload(UploadConfiguration config, LocalArtifact artifact) throws MojoExecutionException, MojoFailureException;
-  void destroy() throws MojoExecutionException, MojoFailureException;
+public interface FileUploader extends Closeable {
+  void init(UploadConfiguration config);
+  Set<S3Artifact> upload(Set<LocalArtifact> artifacts)
+    throws MojoExecutionException, MojoFailureException;
 }

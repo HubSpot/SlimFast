@@ -9,19 +9,25 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonHelper {
 
-  public static void writeArtifactsToJson(File outputFile, S3ArtifactWrapper wrapper) throws IOException {
+  private static final Logger LOG = LoggerFactory.getLogger(JsonHelper.class);
+
+  public static void writeArtifactsToJson(File outputFile, S3ArtifactWrapper wrapper)
+    throws IOException {
     JSONObject json = new JSONObject();
 
     JSONArray artifacts = new JSONArray();
@@ -38,7 +44,35 @@ public class JsonHelper {
     }
   }
 
-  public static S3ArtifactWrapper readArtifactsFromJson(File inputFile) throws IOException {
+  public static void writeArtifactsToJson(
+    File outputFile,
+    PreparedArtifactWrapper wrapper
+  ) throws IOException {
+    JSONObject json = new JSONObject();
+
+    JSONArray artifacts = new JSONArray();
+    for (PreparedArtifact artifact : wrapper.getArtifacts()) {
+      artifacts.add(toJsonObject(artifact));
+    }
+
+    json.put("prefix", wrapper.getPrefix().toString());
+    json.put("artifacts", artifacts);
+
+    try (Writer writer = newWriter(outputFile)) {
+      json.writeJSONString(writer);
+      writer.flush();
+    }
+
+    if (LOG.isDebugEnabled()) {
+      StringWriter writer = new StringWriter();
+      json.writeJSONString(writer);
+
+      LOG.debug("Wrote artifacts json: {}", writer.toString());
+    }
+  }
+
+  public static S3ArtifactWrapper readArtifactsFromJson(File inputFile)
+    throws IOException {
     JSONParser parser = new JSONParser();
 
     try (Reader reader = newReader(inputFile)) {
@@ -58,14 +92,39 @@ public class JsonHelper {
     }
   }
 
+  public static PreparedArtifactWrapper readPreparedArtifactsFromJson(File inputFile)
+    throws IOException {
+    JSONParser parser = new JSONParser();
+
+    try (Reader reader = newReader(inputFile)) {
+      try {
+        JSONObject parsed = (JSONObject) parser.parse(reader);
+
+        String prefix = (String) parsed.get("prefix");
+        Set<PreparedArtifact> artifacts = new LinkedHashSet<>();
+        for (Object object : (JSONArray) parsed.get("artifacts")) {
+          artifacts.add(preparedArtifactFromJsonObject((JSONObject) object));
+        }
+
+        return new PreparedArtifactWrapper(Path.of(prefix), artifacts);
+      } catch (ParseException e) {
+        throw new IOException(e);
+      }
+    }
+  }
+
   private static Writer newWriter(File file) throws IOException {
     FileOutputStream outputStream = new FileOutputStream(file);
-    return new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+    return new BufferedWriter(
+      new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+    );
   }
 
   private static Reader newReader(File file) throws IOException {
     FileInputStream outputStream = new FileInputStream(file);
-    return new BufferedReader(new InputStreamReader(outputStream, StandardCharsets.UTF_8));
+    return new BufferedReader(
+      new InputStreamReader(outputStream, StandardCharsets.UTF_8)
+    );
   }
 
   private static JSONObject toJsonObject(S3Artifact artifact) {
@@ -87,5 +146,20 @@ public class JsonHelper {
     long size = ((Number) json.get("filesize")).longValue();
 
     return new S3Artifact(bucket, key, targetPath, md5, size);
+  }
+
+  private static JSONObject toJsonObject(PreparedArtifact preparedArtifact) {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("localPath", preparedArtifact.getLocalPath());
+    jsonObject.put("targetPath", preparedArtifact.getTargetPath());
+
+    return jsonObject;
+  }
+
+  private static PreparedArtifact preparedArtifactFromJsonObject(JSONObject jsonObject) {
+    String localPath = (String) jsonObject.get("localPath");
+    String targetPath = (String) jsonObject.get("targetPath");
+
+    return new PreparedArtifact(localPath, targetPath);
   }
 }

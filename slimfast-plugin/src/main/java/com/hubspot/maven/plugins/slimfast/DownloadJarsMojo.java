@@ -2,42 +2,50 @@ package com.hubspot.maven.plugins.slimfast;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
+import java.util.Optional;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-
-import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import software.amazon.awssdk.regions.Region;
 
 @Mojo(name = "download", requiresProject = false, threadSafe = true)
 public class DownloadJarsMojo extends AbstractMojo {
 
-  @Parameter(property = "slimfast.fileDownloader", alias = "fileDownloader", defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileDownloader")
+  @Parameter(
+    property = "slimfast.fileDownloader",
+    alias = "fileDownloader",
+    defaultValue = "com.hubspot.maven.plugins.slimfast.DefaultFileDownloader"
+  )
   private String fileDownloaderType;
 
-  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}", required = true)
+  @Parameter(
+    property = "slimfast.s3.accessKey",
+    defaultValue = "${s3.access.key}",
+    required = true
+  )
   private String s3AccessKey;
 
-  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}", required = true)
+  @Parameter(
+    property = "slimfast.s3.secretKey",
+    defaultValue = "${s3.secret.key}",
+    required = true
+  )
   private String s3SecretKey;
+
+  @Parameter(property = "slimfast.s3.region", defaultValue = "${s3.region}")
+  private String s3Region;
 
   @Parameter(property = "slimfast.s3.downloadThreads", defaultValue = "10")
   private int s3DownloadThreads;
 
-  @Parameter(property = "slimfast.cacheDirectory", defaultValue = "${settings.localRepository}")
+  @Parameter(
+    property = "slimfast.cacheDirectory",
+    defaultValue = "${settings.localRepository}"
+  )
   private String cacheDirectory;
 
   @Parameter(property = "slimfast.outputDirectory", defaultValue = "${basedir}")
@@ -53,26 +61,12 @@ public class DownloadJarsMojo extends AbstractMojo {
     final DownloadConfiguration configuration = buildConfiguration(wrapper.getPrefix());
     FileHelper.ensureDirectoryExists(configuration.getCacheDirectory());
 
-    ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("slimfast-download").setDaemon(true).build();
-    ExecutorService executor = Executors.newFixedThreadPool(s3DownloadThreads, threadFactory);
-    final FileDownloader downloader = instantiateFileDownloader();
-    downloader.init(configuration, getLog());
-
-    List<Future<?>> futures = new ArrayList<>();
-    for (final S3Artifact artifact : wrapper.getArtifacts()) {
-      futures.add(executor.submit(new Callable<Object>() {
-
-        @Override
-        public Object call() throws Exception {
-          downloader.download(configuration, artifact);
-          return null;
-        }
-      }));
+    try (FileDownloader downloader = instantiateFileDownloader()) {
+      downloader.init(configuration);
+      downloader.download(wrapper.getArtifacts());
+    } catch (IOException e) {
+      throw new MojoExecutionException(e);
     }
-
-    executor.shutdown();
-    waitForDownloadsToFinish(executor, futures);
-    downloader.destroy();
   }
 
   private S3ArtifactWrapper readArtifactInfo() throws MojoFailureException {
@@ -83,42 +77,40 @@ public class DownloadJarsMojo extends AbstractMojo {
     }
   }
 
-  private void waitForDownloadsToFinish(ExecutorService executor, List<Future<?>> futures) throws MojoExecutionException, MojoFailureException {
-    try {
-      if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
-        getLog().error("Took more than 5 minutes to download files, quitting");
-        throw new MojoExecutionException("Took more than 5 minutes to download files");
-      }
-
-      for (Future<?> future : futures) {
-        future.get();
-
-      }
-    } catch (InterruptedException e) {
-      throw new MojoExecutionException("Interrupted", e);
-    } catch (ExecutionException e) {
-      Throwables.propagateIfInstanceOf(e.getCause(), MojoExecutionException.class);
-      Throwables.propagateIfInstanceOf(e.getCause(), MojoFailureException.class);
-      throw new MojoExecutionException("Unexpected exception", e.getCause());
-    }
-  }
-
   private DownloadConfiguration buildConfiguration(String prefix) {
+    S3Configuration s3Configuration = new S3Configuration(
+      s3AccessKey,
+      s3SecretKey,
+      Optional.ofNullable(s3Region).map(Region::of),
+      Optional.of(20.0), // aws-sdk default is 10.0
+      Optional.empty() // aws-sdk default is 8mb
+    );
+
     return new DownloadConfiguration(
-        Paths.get(prefix),
-        Paths.get(cacheDirectory),
-        Paths.get(outputDirectory),
-        s3AccessKey,
-        s3SecretKey
+      s3Configuration,
+      Paths.get(prefix),
+      Paths.get(cacheDirectory),
+      Paths.get(outputDirectory)
     );
   }
 
   private FileDownloader instantiateFileDownloader() throws MojoExecutionException {
     try {
-      return (FileDownloader) Class.forName(fileDownloaderType).newInstance();
+      return (FileDownloader) Class
+        .forName(fileDownloaderType)
+        .getDeclaredConstructor()
+        .newInstance();
     } catch (ClassNotFoundException e) {
-      throw new MojoExecutionException("Unable to find file downloader implementation", e);
-    } catch (InstantiationException | IllegalAccessException e) {
+      throw new MojoExecutionException(
+        "Unable to find file downloader implementation",
+        e
+      );
+    } catch (
+      InstantiationException
+      | IllegalAccessException
+      | NoSuchMethodException
+      | InvocationTargetException e
+    ) {
       throw new MojoExecutionException("Unable to instantiate file downloader", e);
     } catch (ClassCastException e) {
       throw new MojoExecutionException("Must implement FileDownloader interface", e);

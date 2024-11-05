@@ -14,7 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.maven.archiver.ManifestConfiguration;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.artifact.Artifact;
@@ -34,15 +36,32 @@ import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.codehaus.plexus.interpolation.ValueSource;
 
+@Named
+@Singleton
 public class ArtifactHelper {
-  private static final List<String> ARTIFACT_EXPRESSION_PREFIXES = Collections.singletonList("artifact.");
 
-  public static LocalArtifactWrapper getArtifactPaths(BeanConfigurator beanConfigurator,
-                                                      MavenProject project) throws MojoExecutionException {
-    ManifestConfiguration manifestConfiguration = parseManifestConfiguration(beanConfigurator, project);
+  private static final List<String> ARTIFACT_EXPRESSION_PREFIXES =
+    Collections.singletonList("artifact.");
+
+  private final BeanConfigurator beanConfigurator;
+  private final MavenProject project;
+
+  @Inject
+  public ArtifactHelper(BeanConfigurator beanConfigurator, MavenProject project) {
+    this.beanConfigurator = beanConfigurator;
+    this.project = project;
+  }
+
+  public LocalArtifactWrapper getArtifactPaths() throws MojoExecutionException {
+    ManifestConfiguration manifestConfiguration = parseManifestConfiguration(
+      beanConfigurator,
+      project
+    );
 
     if (!manifestConfiguration.isAddClasspath()) {
-      throw new MojoExecutionException("maven-jar-plugin is not configured to add classpath");
+      throw new MojoExecutionException(
+        "maven-jar-plugin is not configured to add classpath"
+      );
     }
 
     Set<LocalArtifact> artifacts = new HashSet<>();
@@ -67,13 +86,20 @@ public class ArtifactHelper {
     return new LocalArtifactWrapper(prefix, artifacts);
   }
 
-  private static ManifestConfiguration parseManifestConfiguration(BeanConfigurator beanConfigurator,
-                                                                  MavenProject project) throws MojoExecutionException {
+  private static ManifestConfiguration parseManifestConfiguration(
+    BeanConfigurator beanConfigurator,
+    MavenProject project
+  ) throws MojoExecutionException {
     MavenArchiveConfiguration archiveConfiguration = new MavenArchiveConfiguration();
 
     BeanConfigurationRequest beanConfiguration = new DefaultBeanConfigurationRequest()
-        .setBean(archiveConfiguration)
-        .setConfiguration(project.getModel(), "org.apache.maven.plugins", "maven-jar-plugin", "default-jar");
+      .setBean(archiveConfiguration)
+      .setConfiguration(
+        project.getModel(),
+        "org.apache.maven.plugins",
+        "maven-jar-plugin",
+        "default-jar"
+      );
 
     beanConfiguration.setConfiguration(beanConfiguration.getConfiguration(), "archive");
 
@@ -86,7 +112,8 @@ public class ArtifactHelper {
     return archiveConfiguration.getManifest();
   }
 
-  private static List<String> classpathElements(MavenProject project) throws MojoExecutionException {
+  private static List<String> classpathElements(MavenProject project)
+    throws MojoExecutionException {
     try {
       return project.getRuntimeClasspathElements();
     } catch (DependencyResolutionRequiredException e) {
@@ -94,7 +121,8 @@ public class ArtifactHelper {
     }
   }
 
-  private static Path computePath(Artifact artifact, ManifestConfiguration config) throws MojoExecutionException {
+  private static Path computePath(Artifact artifact, ManifestConfiguration config)
+    throws MojoExecutionException {
     String layoutType = config.getClasspathLayoutType();
     String layout = config.getCustomClasspathLayout();
 
@@ -102,8 +130,16 @@ public class ArtifactHelper {
 
     List<ValueSource> valueSources = new ArrayList<>();
 
-    valueSources.add(new PrefixedObjectValueSource(ARTIFACT_EXPRESSION_PREFIXES, artifact, true));
-    valueSources.add(new PrefixedObjectValueSource(ARTIFACT_EXPRESSION_PREFIXES, artifact.getArtifactHandler(), true));
+    valueSources.add(
+      new PrefixedObjectValueSource(ARTIFACT_EXPRESSION_PREFIXES, artifact, true)
+    );
+    valueSources.add(
+      new PrefixedObjectValueSource(
+        ARTIFACT_EXPRESSION_PREFIXES,
+        artifact.getArtifactHandler(),
+        true
+      )
+    );
 
     Properties extraExpressions = new Properties();
     if (!artifact.isSnapshot()) {
@@ -118,13 +154,21 @@ public class ArtifactHelper {
       extraExpressions.setProperty("dashClassifier", "");
       extraExpressions.setProperty("dashClassifier?", "");
     }
-    valueSources.add(new PrefixedPropertiesValueSource(ARTIFACT_EXPRESSION_PREFIXES, extraExpressions, true));
+    valueSources.add(
+      new PrefixedPropertiesValueSource(
+        ARTIFACT_EXPRESSION_PREFIXES,
+        extraExpressions,
+        true
+      )
+    );
 
     for (ValueSource vs : valueSources) {
       interpolator.addValueSource(vs);
     }
 
-    RecursionInterceptor recursionInterceptor = new PrefixAwareRecursionInterceptor(ARTIFACT_EXPRESSION_PREFIXES);
+    RecursionInterceptor recursionInterceptor = new PrefixAwareRecursionInterceptor(
+      ARTIFACT_EXPRESSION_PREFIXES
+    );
 
     try {
       boolean useUniqueVersionsLayout = config.isUseUniqueVersions();
@@ -132,16 +176,20 @@ public class ArtifactHelper {
       final String resolvedLayout;
       switch (layoutType) {
         case ManifestConfiguration.CLASSPATH_LAYOUT_TYPE_SIMPLE:
-          resolvedLayout = useUniqueVersionsLayout ? SIMPLE_LAYOUT : SIMPLE_LAYOUT_NONUNIQUE;
+          resolvedLayout =
+            useUniqueVersionsLayout ? SIMPLE_LAYOUT : SIMPLE_LAYOUT_NONUNIQUE;
           break;
         case ManifestConfiguration.CLASSPATH_LAYOUT_TYPE_REPOSITORY:
-          resolvedLayout = useUniqueVersionsLayout ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
+          resolvedLayout =
+            useUniqueVersionsLayout ? REPOSITORY_LAYOUT : REPOSITORY_LAYOUT_NONUNIQUE;
           break;
         case ManifestConfiguration.CLASSPATH_LAYOUT_TYPE_CUSTOM:
           resolvedLayout = layout;
           break;
         default:
-          throw new MojoExecutionException("Unknown classpath layout type: " + layoutType);
+          throw new MojoExecutionException(
+            "Unknown classpath layout type: " + layoutType
+          );
       }
 
       return Paths.get(interpolator.interpolate(resolvedLayout, recursionInterceptor));

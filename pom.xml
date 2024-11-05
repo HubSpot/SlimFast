@@ -5,17 +5,13 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>25.3</version>
+    <version>60.3</version>
   </parent>
 
   <groupId>com.hubspot.slimfast</groupId>
   <artifactId>slimfast-parent</artifactId>
-  <version>0.20-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <prerequisites>
-    <maven>3</maven>
-  </prerequisites>
 
   <modules>
     <module>slimfast-plugin</module>
@@ -23,58 +19,16 @@
   </modules>
 
   <properties>
-    <aws.sdk.version>1.11.461</aws.sdk.version>
-    <dep.httpclient.version>4.5.5</dep.httpclient.version>
-    <dep.httpcore.version>4.4.9</dep.httpcore.version>
+    <project.build.targetJdk>17</project.build.targetJdk>
+
+    <basepom.check.fail-duplicate-finder>false</basepom.check.fail-duplicate-finder>
+
+    <dep.guava.version>33.2.1-jre</dep.guava.version>
+    <dep.slf4j.version>1.7.36</dep.slf4j.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-archiver</artifactId>
-        <version>3.0.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-artifact</artifactId>
-        <version>3.3.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-core</artifactId>
-        <version>3.3.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-model</artifactId>
-        <version>3.3.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-plugin-api</artifactId>
-        <version>3.3.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven.plugin-tools</groupId>
-        <artifactId>maven-plugin-annotations</artifactId>
-        <version>3.4</version>
-      </dependency>
-      <dependency>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-interpolation</artifactId>
-        <version>1.22</version>
-      </dependency>
-      <dependency>
-        <groupId>com.amazonaws</groupId>
-        <artifactId>aws-java-sdk-s3</artifactId>
-        <version>${aws.sdk.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.hubspot</groupId>
-        <artifactId>failsafe-s3-decorator</artifactId>
-        <version>0.7</version>
-      </dependency>
       <dependency>
         <groupId>com.googlecode.json-simple</groupId>
         <artifactId>json-simple</artifactId>
@@ -91,20 +45,36 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-archiver</artifactId>
+        <version>3.6.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-interpolation</artifactId>
+        <version>1.27</version>
+      </dependency>
+      <dependency>
+        <groupId>software.amazon.awssdk.crt</groupId>
+        <artifactId>aws-crt</artifactId>
+        <version>0.33.0</version>
+      </dependency>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>2.29.6</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.4</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 
   <developers>
     <developer>
