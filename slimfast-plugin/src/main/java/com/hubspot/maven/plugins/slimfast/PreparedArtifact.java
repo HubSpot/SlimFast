@@ -1,5 +1,8 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class PreparedArtifact {
 
   private final String localPath;
@@ -16,5 +19,12 @@ public class PreparedArtifact {
 
   public String getTargetPath() {
     return targetPath;
+  }
+
+  public LocalArtifact toLocalArtifact() {
+    Path targetPath = Paths.get(getTargetPath());
+    Path localPath = Paths.get(getLocalPath());
+
+    return new LocalArtifact(localPath, targetPath);
   }
 }

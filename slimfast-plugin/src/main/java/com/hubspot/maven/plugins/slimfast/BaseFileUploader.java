@@ -1,103 +1,85 @@
 package com.hubspot.maven.plugins.slimfast;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 
-public abstract class BaseFileUploader implements FileUploader, FromManifestUploader {
+public abstract class BaseFileUploader implements FileUploader {
 
-  private Set<S3Artifact> s3Artifacts;
-  private Path prefix;
-  private Path outputFile;
+  private UploadConfiguration config;
 
   @Override
-  public final void init(UploadConfiguration config, Log log) {
-    this.s3Artifacts = Collections.synchronizedSet(new LinkedHashSet<S3Artifact>());
-    this.prefix = config.getPrefix();
-    this.outputFile = config.getOutputFile();
-    doInit(config, log);
+  public void init(UploadConfiguration config) {
+    this.config = config;
   }
 
-  protected abstract void doUpload(String bucket, String key, Path path)
-    throws MojoFailureException, MojoExecutionException;
-
-  protected void doInit(UploadConfiguration config, Log log) {
-    // empty by default
-  }
-
-  protected void doDestroy() throws MojoFailureException {
-    // empty by default
-  }
+  protected abstract void doUpload(Set<S3Artifact> artifacts)
+    throws ExecutionException, InterruptedException, TimeoutException;
 
   @Override
-  public void upload(UploadConfiguration config, LocalArtifact artifact)
+  public Set<S3Artifact> upload(Set<LocalArtifact> artifacts)
     throws MojoExecutionException, MojoFailureException {
-    upload(config, artifact.getTargetPath(), artifact.getLocalPath());
+    Set<S3Artifact> s3Artifacts = artifacts
+      .stream()
+      .map(artifact ->
+        new S3Artifact(
+          config.getS3Bucket(),
+          getS3Key(artifact),
+          artifact.getLocalPath(),
+          config.getPrefix().resolve(artifact.getTargetPath()).toString(),
+          FileHelper.md5(artifact.getLocalPath()),
+          FileHelper.size(artifact.getLocalPath())
+        )
+      )
+      .collect(Collectors.toCollection(LinkedHashSet::new));
+
+    try {
+      doUpload(s3Artifacts);
+    } catch (Exception e) {
+      throw new MojoExecutionException("Failed to upload artifacts", e);
+    }
+
+    try {
+      JsonHelper.writeArtifactsToJson(
+        config.getOutputFile().toFile(),
+        new S3ArtifactWrapper(config.getPrefix().toString(), s3Artifacts)
+      );
+    } catch (IOException e) {
+      throw new MojoExecutionException("Error writing dependencies json to file", e);
+    }
+
+    return s3Artifacts;
   }
 
-  @Override
-  public void uploadFromManifest(UploadConfiguration config, PreparedArtifact artifact)
-    throws MojoExecutionException, MojoFailureException {
-    Path targetPath = Paths.get(artifact.getTargetPath());
-    Path localPath = Paths.get(artifact.getLocalPath());
+  private String getS3Key(LocalArtifact artifact) {
+    final String s3Key;
 
-    upload(config, targetPath, localPath);
-  }
-
-  private void upload(UploadConfiguration config, Path targetPath, Path localPath)
-    throws MojoExecutionException, MojoFailureException {
-    String file = targetPath.toString();
+    String file = artifact.getTargetPath().toString();
     boolean isUnresolvedSnapshot = file.toUpperCase().endsWith("-SNAPSHOT.JAR");
 
-    final String s3Key;
     if (isUnresolvedSnapshot) {
       if (config.isAllowUnresolvedSnapshots()) {
         String start = file.substring(0, file.length() - ".JAR".length());
         String end = file.substring(file.length() - ".JAR".length());
-        String md5 = FileHelper.md5(localPath);
+        String md5 = FileHelper.md5(artifact.getLocalPath());
         s3Key =
           Paths
             .get(config.getS3ArtifactRoot())
             .resolve(start + "-" + md5 + end)
             .toString();
       } else {
-        throw new MojoExecutionException("Encountered unresolved snapshot: " + file);
+        throw new IllegalStateException("Encountered unresolved snapshot: " + file);
       }
     } else {
       s3Key = Paths.get(config.getS3ArtifactRoot()).resolve(file).toString();
     }
 
-    doUpload(config.getS3Bucket(), s3Key, localPath);
-
-    String targetPathAsString = prefix.resolve(targetPath).toString();
-    s3Artifacts.add(
-      new S3Artifact(
-        config.getS3Bucket(),
-        s3Key,
-        targetPathAsString,
-        FileHelper.md5(localPath),
-        FileHelper.size(localPath)
-      )
-    );
-  }
-
-  @Override
-  public final void destroy() throws MojoFailureException {
-    try {
-      JsonHelper.writeArtifactsToJson(
-        outputFile.toFile(),
-        new S3ArtifactWrapper(prefix.toString(), s3Artifacts)
-      );
-    } catch (IOException e) {
-      throw new MojoFailureException("Error writing dependencies json to file", e);
-    }
-
-    doDestroy();
+    return s3Key;
   }
 }

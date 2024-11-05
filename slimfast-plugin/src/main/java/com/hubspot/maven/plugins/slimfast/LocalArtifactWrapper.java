@@ -3,7 +3,7 @@ package com.hubspot.maven.plugins.slimfast;
 import java.nio.file.Path;
 import java.util.Set;
 
-public class LocalArtifactWrapper {
+public class LocalArtifactWrapper implements ArtifactWrapper {
 
   private final Path prefix;
   private final Set<LocalArtifact> artifacts;
@@ -18,6 +18,11 @@ public class LocalArtifactWrapper {
   }
 
   public Set<LocalArtifact> getArtifacts() {
+    return artifacts;
+  }
+
+  @Override
+  public Set<LocalArtifact> getLocalArtifacts() {
     return artifacts;
   }
 }

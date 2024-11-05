@@ -1,12 +1,11 @@
 package com.hubspot.maven.plugins.slimfast;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
 
 public class S3Factory {
 
@@ -15,17 +14,23 @@ public class S3Factory {
     throw new AssertionError();
   }
 
-  public static AmazonS3 create(String accessKey, String secretKey) {
-    AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-    return AmazonS3ClientBuilder
-      .standard()
-      .withCredentials(new AWSStaticCredentialsProvider(credentials))
-      .withClientConfiguration(
-        new ClientConfiguration()
-          .withConnectionTimeout(2_000)
-          .withRequestTimeout(5_000)
-          .withMaxErrorRetry(5)
-      )
-      .build();
+  public static S3AsyncClient createS3AsyncClient(S3Configuration config) {
+    S3CrtAsyncClientBuilder clientBuilder = S3AsyncClient
+      .crtBuilder()
+      .credentialsProvider(
+        StaticCredentialsProvider.create(
+          AwsBasicCredentials.create(config.getAccessKey(), config.getSecretKey())
+        )
+      );
+
+    config.getRegion().ifPresent(clientBuilder::region);
+    config.getTargetThroughputGbps().ifPresent(clientBuilder::targetThroughputInGbps);
+    config.getMinPartSizeBytes().ifPresent(clientBuilder::minimumPartSizeInBytes);
+
+    return clientBuilder.build();
+  }
+
+  public static S3TransferManager createTransferManager(S3AsyncClient s3AsyncClient) {
+    return S3TransferManager.builder().s3Client(s3AsyncClient).build();
   }
 }

@@ -1,57 +1,139 @@
 package com.hubspot.maven.plugins.slimfast;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkBaseException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import java.nio.file.Path;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
+import com.google.common.base.Throwables;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.UploadFileRequest;
 
 public class DefaultFileUploader extends BaseFileUploader {
 
-  private AmazonS3 s3Service;
-  private Log log;
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultFileUploader.class);
+
+  private S3AsyncClient s3AsyncClient;
+  private S3TransferManager s3TransferManager;
 
   @Override
-  protected void doInit(UploadConfiguration config, Log log) {
-    this.s3Service = S3Factory.create(config.getS3AccessKey(), config.getS3SecretKey());
-    this.log = log;
+  public void init(UploadConfiguration config) {
+    super.init(config);
+    this.s3AsyncClient = S3Factory.createS3AsyncClient(config.getS3Configuration());
+    this.s3TransferManager = S3Factory.createTransferManager(s3AsyncClient);
   }
 
   @Override
-  protected void doUpload(String bucket, String key, Path path)
-    throws MojoFailureException, MojoExecutionException {
-    if (keyExists(bucket, key)) {
-      log.info("Key already exists " + key);
+  protected void doUpload(Set<S3Artifact> artifacts)
+    throws ExecutionException, InterruptedException, TimeoutException {
+    Optional<String> bucket = artifacts.stream().findFirst().map(S3Artifact::getBucket);
+    if (bucket.isEmpty()) {
       return;
     }
 
-    try {
-      s3Service.putObject(bucket, key, path.toFile());
-      log.info("Successfully uploaded key " + key);
-    } catch (SdkClientException e) {
-      throw new MojoFailureException("Error uploading file " + path, e);
-    }
+    Set<String> existingKeys = checkForExistingKeys(
+      bucket.get(),
+      artifacts.stream().map(S3Artifact::getKey).collect(Collectors.toSet())
+    );
+
+    artifacts
+      .stream()
+      .filter(artifact -> {
+        if (existingKeys.contains(artifact.getKey())) {
+          LOG.info("Key already exists {}", artifact.getKey());
+          return false;
+        } else {
+          return true;
+        }
+      })
+      .map(artifact ->
+        s3TransferManager
+          .uploadFile(
+            UploadFileRequest
+              .builder()
+              .putObjectRequest(b -> b.bucket(artifact.getBucket()).key(artifact.getKey())
+              )
+              .source(
+                artifact
+                  .getLocalPath()
+                  .orElseThrow(() ->
+                    new IllegalArgumentException(
+                      "Artifact " + artifact.getKey() + " is missing localPath"
+                    )
+                  )
+              )
+              .build()
+          )
+          .completionFuture()
+          .handle((result, ex) -> {
+            if (ex != null) {
+              throw new RuntimeException(
+                "Error uploading file " + artifact.getLocalPath().get(),
+                Throwables.getRootCause(ex)
+              );
+            }
+            LOG.info("Successfully uploaded key {}", artifact.getKey());
+            return result;
+          })
+      )
+      .collect(futuresToSet())
+      .get(5, TimeUnit.MINUTES);
   }
 
   @Override
-  protected void doDestroy() throws MojoFailureException {}
+  public void close() {
+    s3AsyncClient.close();
+  }
 
-  private boolean keyExists(String bucket, String key) throws MojoFailureException {
-    try {
-      s3Service.getObjectMetadata(bucket, key);
-      return true;
-    } catch (SdkBaseException e) {
-      if (
-        e instanceof AmazonServiceException &&
-        ((AmazonServiceException) e).getStatusCode() == 404
-      ) {
-        return false;
-      } else {
-        throw new MojoFailureException("Error getting object metadata for key " + key, e);
-      }
-    }
+  private Set<String> checkForExistingKeys(String bucket, Set<String> keys)
+    throws ExecutionException, InterruptedException, TimeoutException {
+    return keys
+      .stream()
+      .map(key ->
+        s3AsyncClient
+          .headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build())
+          .handle((response, ex) -> {
+            if (ex == null) {
+              return Optional.of(key);
+            } else if (Throwables.getRootCause(ex) instanceof NoSuchKeyException) {
+              return Optional.empty();
+            } else {
+              throw new RuntimeException(
+                "Error getting object metadata for key: " + key,
+                ex
+              );
+            }
+          })
+      )
+      .collect(futuresToSet())
+      .get(5, TimeUnit.MINUTES)
+      .stream()
+      .flatMap(Optional::stream)
+      .map(key -> (String) key)
+      .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
+
+  public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<Set<T>>> futuresToSet() {
+    return Collectors.collectingAndThen(
+      Collectors.toCollection(LinkedHashSet::new),
+      futures ->
+        CompletableFuture
+          .allOf(futures.toArray(new CompletableFuture[0]))
+          .thenApply(ignored ->
+            futures
+              .stream()
+              .map(CompletableFuture::join)
+              .collect(Collectors.toCollection(LinkedHashSet::new))
+          )
+    );
   }
 }

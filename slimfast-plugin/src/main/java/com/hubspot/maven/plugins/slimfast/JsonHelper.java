@@ -9,17 +9,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Function;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonHelper {
+
+  private static final Logger LOG = LoggerFactory.getLogger(JsonHelper.class);
 
   public static void writeArtifactsToJson(File outputFile, S3ArtifactWrapper wrapper)
     throws IOException {
@@ -50,12 +55,19 @@ public class JsonHelper {
       artifacts.add(toJsonObject(artifact));
     }
 
-    json.put("prefix", wrapper.getPrefix());
+    json.put("prefix", wrapper.getPrefix().toString());
     json.put("artifacts", artifacts);
 
     try (Writer writer = newWriter(outputFile)) {
       json.writeJSONString(writer);
       writer.flush();
+    }
+
+    if (LOG.isDebugEnabled()) {
+      StringWriter writer = new StringWriter();
+      json.writeJSONString(writer);
+
+      LOG.debug("Wrote artifacts json: {}", writer.toString());
     }
   }
 
@@ -94,7 +106,7 @@ public class JsonHelper {
           artifacts.add(preparedArtifactFromJsonObject((JSONObject) object));
         }
 
-        return new PreparedArtifactWrapper(prefix, artifacts);
+        return new PreparedArtifactWrapper(Path.of(prefix), artifacts);
       } catch (ParseException e) {
         throw new IOException(e);
       }
