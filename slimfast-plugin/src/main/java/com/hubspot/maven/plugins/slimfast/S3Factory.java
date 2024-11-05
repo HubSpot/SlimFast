@@ -2,6 +2,7 @@ package com.hubspot.maven.plugins.slimfast;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
@@ -15,13 +16,20 @@ public class S3Factory {
   }
 
   public static S3AsyncClient createS3AsyncClient(S3Configuration config) {
+    AwsCredentialsProvider credentialsProvider = null;
+    if (config.getAccessKey().isPresent() && config.getSecretKey().isPresent()) {
+      credentialsProvider =
+        StaticCredentialsProvider.create(
+          AwsBasicCredentials.create(
+            config.getAccessKey().get(),
+            config.getSecretKey().get()
+          )
+        );
+    }
+
     S3CrtAsyncClientBuilder clientBuilder = S3AsyncClient
       .crtBuilder()
-      .credentialsProvider(
-        StaticCredentialsProvider.create(
-          AwsBasicCredentials.create(config.getAccessKey(), config.getSecretKey())
-        )
-      );
+      .credentialsProvider(credentialsProvider);
 
     config.getRegion().ifPresent(clientBuilder::region);
     config.getTargetThroughputGbps().ifPresent(clientBuilder::targetThroughputInGbps);
