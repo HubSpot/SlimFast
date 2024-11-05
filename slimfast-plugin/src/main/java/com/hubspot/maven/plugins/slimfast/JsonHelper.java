@@ -11,9 +11,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Function;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -94,7 +94,7 @@ public class JsonHelper {
           artifacts.add(preparedArtifactFromJsonObject((JSONObject) object));
         }
 
-        return new PreparedArtifactWrapper(prefix, artifacts);
+        return new PreparedArtifactWrapper(Path.of(prefix), artifacts);
       } catch (ParseException e) {
         throw new IOException(e);
       }

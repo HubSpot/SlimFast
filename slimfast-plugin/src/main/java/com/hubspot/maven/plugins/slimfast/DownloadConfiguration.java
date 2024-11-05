@@ -1,6 +1,5 @@
 package com.hubspot.maven.plugins.slimfast;
 
-import com.amazonaws.services.s3.AmazonS3;
 import java.nio.file.Path;
 
 public class DownloadConfiguration {

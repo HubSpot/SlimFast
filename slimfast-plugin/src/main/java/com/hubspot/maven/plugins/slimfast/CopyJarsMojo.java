@@ -5,11 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import org.apache.maven.configuration.BeanConfigurator;
+import javax.inject.Inject;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -24,8 +23,8 @@ import org.apache.maven.project.MavenProject;
 )
 public class CopyJarsMojo extends AbstractMojo {
 
-  @Component
-  private BeanConfigurator beanConfigurator;
+  @Inject
+  private ArtifactHelper artifactHelper;
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
@@ -43,10 +42,7 @@ public class CopyJarsMojo extends AbstractMojo {
       return;
     }
 
-    LocalArtifactWrapper artifactWrapper = ArtifactHelper.getArtifactPaths(
-      beanConfigurator,
-      project
-    );
+    LocalArtifactWrapper artifactWrapper = artifactHelper.getArtifactPaths();
     Path prefix = artifactWrapper.getPrefix();
 
     for (LocalArtifact artifact : artifactWrapper.getArtifacts()) {

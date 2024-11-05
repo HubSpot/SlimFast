@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.maven.archiver.ManifestConfiguration;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.artifact.Artifact;
@@ -33,15 +36,23 @@ import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.codehaus.plexus.interpolation.ValueSource;
 
+@Named
+@Singleton
 public class ArtifactHelper {
 
   private static final List<String> ARTIFACT_EXPRESSION_PREFIXES =
     Collections.singletonList("artifact.");
 
-  public static LocalArtifactWrapper getArtifactPaths(
-    BeanConfigurator beanConfigurator,
-    MavenProject project
-  ) throws MojoExecutionException {
+  private final BeanConfigurator beanConfigurator;
+  private final MavenProject project;
+
+  @Inject
+  public ArtifactHelper(BeanConfigurator beanConfigurator, MavenProject project) {
+    this.beanConfigurator = beanConfigurator;
+    this.project = project;
+  }
+
+  public LocalArtifactWrapper getArtifactPaths() throws MojoExecutionException {
     ManifestConfiguration manifestConfiguration = parseManifestConfiguration(
       beanConfigurator,
       project
