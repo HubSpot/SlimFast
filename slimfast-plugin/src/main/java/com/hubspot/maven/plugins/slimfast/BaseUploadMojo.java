@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 public abstract class BaseUploadMojo extends AbstractMojo {
 
@@ -40,6 +42,9 @@ public abstract class BaseUploadMojo extends AbstractMojo {
     required = true
   )
   private String s3SecretKey;
+
+  @Parameter(property = "slimfast.s3.region")
+  private String s3Region;
 
   @Parameter(property = "slimfast.dryRun", defaultValue = "false")
   private boolean dryRun;
@@ -95,12 +100,19 @@ public abstract class BaseUploadMojo extends AbstractMojo {
   protected abstract ArtifactWrapper getArtifactWrapper() throws MojoExecutionException;
 
   protected UploadConfiguration buildConfiguration(Path prefix) {
+    S3Configuration s3Configuration = new S3Configuration(
+      s3AccessKey,
+      s3SecretKey,
+      Optional.ofNullable(s3Region).map(Region::of),
+      Optional.of(20.0), // aws-sdk default is 10.0
+      Optional.empty() // aws-sdk default is 8mb
+    );
+
     return new UploadConfiguration(
+      s3Configuration,
       prefix,
       s3Bucket,
       s3ArtifactRoot,
-      s3AccessKey,
-      s3SecretKey,
       Paths.get(outputFile),
       allowUnresolvedSnapshots
     );

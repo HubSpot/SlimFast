@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import software.amazon.awssdk.regions.Region;
 
 @Mojo(name = "download", requiresProject = false, threadSafe = true)
 public class DownloadJarsMojo extends AbstractMojo {
@@ -33,6 +35,9 @@ public class DownloadJarsMojo extends AbstractMojo {
     required = true
   )
   private String s3SecretKey;
+
+  @Parameter(property = "slimfast.s3.region")
+  private String s3Region;
 
   @Parameter(property = "slimfast.s3.downloadThreads", defaultValue = "10")
   private int s3DownloadThreads;
@@ -73,12 +78,19 @@ public class DownloadJarsMojo extends AbstractMojo {
   }
 
   private DownloadConfiguration buildConfiguration(String prefix) {
+    S3Configuration s3Configuration = new S3Configuration(
+      s3AccessKey,
+      s3SecretKey,
+      Optional.ofNullable(s3Region).map(Region::of),
+      Optional.of(20.0), // aws-sdk default is 10.0
+      Optional.empty() // aws-sdk default is 8mb
+    );
+
     return new DownloadConfiguration(
+      s3Configuration,
       Paths.get(prefix),
       Paths.get(cacheDirectory),
-      Paths.get(outputDirectory),
-      s3AccessKey,
-      s3SecretKey
+      Paths.get(outputDirectory)
     );
   }
 

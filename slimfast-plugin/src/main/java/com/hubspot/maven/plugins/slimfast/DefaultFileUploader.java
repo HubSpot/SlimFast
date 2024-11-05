@@ -28,8 +28,7 @@ public class DefaultFileUploader extends BaseFileUploader {
   @Override
   public void init(UploadConfiguration config) {
     super.init(config);
-    this.s3AsyncClient =
-      S3Factory.createS3AsyncClient(config.getS3AccessKey(), config.getS3SecretKey());
+    this.s3AsyncClient = S3Factory.createS3AsyncClient(config.getS3Configuration());
     this.s3TransferManager = S3Factory.createTransferManager(s3AsyncClient);
   }
 
