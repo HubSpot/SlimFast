@@ -1,5 +1,6 @@
 package com.hubspot.maven.plugins.slimfast;
 
+import com.google.common.base.Throwables;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -78,7 +79,7 @@ public class DefaultFileUploader extends BaseFileUploader {
             if (ex != null) {
               throw new RuntimeException(
                 "Error uploading file " + artifact.getLocalPath().get(),
-                ex
+                Throwables.getRootCause(ex)
               );
             }
             LOG.info("Successfully uploaded key {}", artifact.getKey());
@@ -102,15 +103,15 @@ public class DefaultFileUploader extends BaseFileUploader {
         s3AsyncClient
           .headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build())
           .handle((response, ex) -> {
-            if (ex instanceof NoSuchKeyException) {
+            if (ex == null) {
+              return Optional.of(key);
+            } else if (Throwables.getRootCause(ex) instanceof NoSuchKeyException) {
               return Optional.empty();
-            } else if (ex != null) {
+            } else {
               throw new RuntimeException(
                 "Error getting object metadata for key: " + key,
                 ex
               );
-            } else {
-              return Optional.of(key);
             }
           })
       )
