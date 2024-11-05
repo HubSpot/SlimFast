@@ -13,7 +13,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
 
 @Mojo(
   name = "copy",
@@ -25,9 +24,6 @@ public class CopyJarsMojo extends AbstractMojo {
 
   @Inject
   private ArtifactHelper artifactHelper;
-
-  @Parameter(defaultValue = "${project}", readonly = true, required = true)
-  private MavenProject project;
 
   @Parameter(property = "slimfast.outputDirectory", defaultValue = "${basedir}")
   private String outputDirectory;
