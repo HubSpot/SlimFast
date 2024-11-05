@@ -29,18 +29,10 @@ public abstract class BaseUploadMojo extends AbstractMojo {
   )
   private String fileUploaderType;
 
-  @Parameter(
-    property = "slimfast.s3.accessKey",
-    defaultValue = "${s3.access.key}",
-    required = true
-  )
+  @Parameter(property = "slimfast.s3.accessKey", defaultValue = "${s3.access.key}")
   private String s3AccessKey;
 
-  @Parameter(
-    property = "slimfast.s3.secretKey",
-    defaultValue = "${s3.secret.key}",
-    required = true
-  )
+  @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}")
   private String s3SecretKey;
 
   @Parameter(property = "slimfast.s3.region", defaultValue = "${s3.region}")
@@ -101,8 +93,8 @@ public abstract class BaseUploadMojo extends AbstractMojo {
 
   protected UploadConfiguration buildConfiguration(Path prefix) {
     S3Configuration s3Configuration = new S3Configuration(
-      s3AccessKey,
-      s3SecretKey,
+      Optional.ofNullable(s3AccessKey),
+      Optional.ofNullable(s3SecretKey),
       Optional.ofNullable(s3Region).map(Region::of),
       Optional.of(20.0), // aws-sdk default is 10.0
       Optional.empty() // aws-sdk default is 8mb

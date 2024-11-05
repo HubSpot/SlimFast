@@ -5,16 +5,16 @@ import software.amazon.awssdk.regions.Region;
 
 public class S3Configuration {
 
-  private final String accessKey;
-  private final String secretKey;
+  private final Optional<String> accessKey;
+  private final Optional<String> secretKey;
 
   private final Optional<Region> region;
   private final Optional<Double> targetThroughputGbps;
   private final Optional<Long> minPartSizeBytes;
 
   public S3Configuration(
-    String accessKey,
-    String secretKey,
+    Optional<String> accessKey,
+    Optional<String> secretKey,
     Optional<Region> region,
     Optional<Double> targetThroughputGbps,
     Optional<Long> minPartSizeBytes
@@ -26,11 +26,11 @@ public class S3Configuration {
     this.minPartSizeBytes = minPartSizeBytes;
   }
 
-  public String getAccessKey() {
+  public Optional<String> getAccessKey() {
     return accessKey;
   }
 
-  public String getSecretKey() {
+  public Optional<String> getSecretKey() {
     return secretKey;
   }
 
