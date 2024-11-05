@@ -28,11 +28,8 @@ public class DownloadJarsMojo extends AbstractMojo {
   @Parameter(property = "slimfast.s3.secretKey", defaultValue = "${s3.secret.key}")
   private String s3SecretKey;
 
-  @Parameter(property = "slimfast.s3.region", defaultValue = "${s3.region}")
-  private String s3Region;
-
-  @Parameter(property = "slimfast.s3.downloadThreads", defaultValue = "10")
-  private int s3DownloadThreads;
+  @Parameter(property = "slimfast.aws.region", defaultValue = "${aws.region}")
+  private String awsRegion;
 
   @Parameter(
     property = "slimfast.cacheDirectory",
@@ -73,7 +70,7 @@ public class DownloadJarsMojo extends AbstractMojo {
     S3Configuration s3Configuration = new S3Configuration(
       Optional.ofNullable(s3AccessKey),
       Optional.ofNullable(s3SecretKey),
-      Optional.ofNullable(s3Region).map(Region::of),
+      Optional.ofNullable(awsRegion).map(Region::of),
       Optional.of(20.0), // aws-sdk default is 10.0
       Optional.empty() // aws-sdk default is 8mb
     );
