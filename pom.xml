@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>60.3</version>
+    <version>61.2</version>
   </parent>
 
   <groupId>com.hubspot.slimfast</groupId>
@@ -22,9 +22,6 @@
     <project.build.targetJdk>17</project.build.targetJdk>
 
     <basepom.check.fail-duplicate-finder>false</basepom.check.fail-duplicate-finder>
-
-    <dep.guava.version>33.2.1-jre</dep.guava.version>
-    <dep.slf4j.version>1.7.36</dep.slf4j.version>
   </properties>
 
   <dependencyManagement>
