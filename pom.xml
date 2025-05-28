@@ -5,13 +5,16 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>62.1</version>
+    <version>63.0</version>
   </parent>
 
   <groupId>com.hubspot.slimfast</groupId>
   <artifactId>slimfast-parent</artifactId>
   <version>1.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>A tool for slimming down uber jars</description>
 
   <modules>
     <module>slimfast-plugin</module>
@@ -72,6 +75,15 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <url>https://github.com/HubSpot/SlimFast</url>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 
   <developers>
     <developer>
