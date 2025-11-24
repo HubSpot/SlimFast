@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,6 +44,8 @@ public class ArtifactHelper {
   private static final List<String> ARTIFACT_EXPRESSION_PREFIXES =
     Collections.singletonList("artifact.");
 
+  private static final Object ARTIFACTS_LOCK = new Object();
+
   private final BeanConfigurator beanConfigurator;
   private final MavenProject project;
 
@@ -65,7 +68,7 @@ public class ArtifactHelper {
     }
 
     Set<LocalArtifact> artifacts = new HashSet<>();
-    for (String classpathElement : classpathElements(project)) {
+    for (String classpathElement : classpathElements()) {
       File classpathFile = new File(classpathElement);
       if (classpathFile.getAbsoluteFile().isFile()) {
         Artifact artifact = findArtifactWithFile(project.getArtifacts(), classpathFile);
@@ -117,7 +120,7 @@ public class ArtifactHelper {
    * a defensive copy of project.getArtifacts() prior to iteration, to prevent
    * ConcurrentModificationExceptions.
    */
-  private static List<String> classpathElements(MavenProject project) {
+  private List<String> classpathElements() {
     List<String> list = new ArrayList<>(project.getArtifacts().size() + 1);
 
     String d = project.getBuild().getOutputDirectory();
@@ -125,7 +128,29 @@ public class ArtifactHelper {
       list.add(d);
     }
 
-    for (Artifact a : new LinkedHashSet<>(project.getArtifacts())) {
+    Set<Artifact> artifactsCopy;
+    int attempts = 0;
+    while (true) {
+      try {
+        synchronized (ARTIFACTS_LOCK) {
+          artifactsCopy = new LinkedHashSet<>(project.getArtifacts());
+          break;
+        }
+      } catch (ConcurrentModificationException e) {
+        if (++attempts > 10) {
+          throw new RuntimeException("Failed to copy artifacts after 10 attempts", e);
+        }
+        // Brief pause before retry
+        try {
+          Thread.sleep(10L * attempts);
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+          throw new RuntimeException("Interrupted while retrying artifact copy", ie);
+        }
+      }
+    }
+
+    for (Artifact a : artifactsCopy) {
       if (
         a.getArtifactHandler().isAddedToClasspath() &&
         // TODO let the scope handler deal with this
