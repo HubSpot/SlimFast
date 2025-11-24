@@ -12,6 +12,8 @@
   <artifactId>slimfast-plugin</artifactId>
   <packaging>maven-plugin</packaging>
 
+  <name>${project.groupId}:${project.artifactId}</name>
+
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
