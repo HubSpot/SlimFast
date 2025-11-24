@@ -10,6 +10,8 @@
 
   <artifactId>slimfast-hadoop</artifactId>
 
+  <name>${project.groupId}:${project.artifactId}</name>
+
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
