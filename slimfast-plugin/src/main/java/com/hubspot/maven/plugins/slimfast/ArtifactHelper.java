@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -20,7 +21,6 @@ import javax.inject.Singleton;
 import org.apache.maven.archiver.ManifestConfiguration;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.configuration.BeanConfigurationException;
 import org.apache.maven.configuration.BeanConfigurationRequest;
 import org.apache.maven.configuration.BeanConfigurator;
@@ -112,13 +112,33 @@ public class ArtifactHelper {
     return archiveConfiguration.getManifest();
   }
 
-  private static List<String> classpathElements(MavenProject project)
-    throws MojoExecutionException {
-    try {
-      return project.getRuntimeClasspathElements();
-    } catch (DependencyResolutionRequiredException e) {
-      throw new MojoExecutionException("Error resolving dependencies", e);
+  /*
+   * This is a copy of MavenProject::getRuntimeClasspathElements() which makes
+   * a defensive copy of project.getArtifacts() prior to iteration, to prevent
+   * ConcurrentModificationExceptions.
+   */
+  private static List<String> classpathElements(MavenProject project) {
+    List<String> list = new ArrayList<>(project.getArtifacts().size() + 1);
+
+    String d = project.getBuild().getOutputDirectory();
+    if (d != null) {
+      list.add(d);
     }
+
+    for (Artifact a : new LinkedHashSet<>(project.getArtifacts())) {
+      if (
+        a.getArtifactHandler().isAddedToClasspath() &&
+        // TODO let the scope handler deal with this
+        (Artifact.SCOPE_COMPILE.equals(a.getScope()) ||
+          Artifact.SCOPE_RUNTIME.equals(a.getScope()))
+      ) {
+        File file = a.getFile();
+        if (file != null) {
+          list.add(file.getPath());
+        }
+      }
+    }
+    return list;
   }
 
   private static Path computePath(Artifact artifact, ManifestConfiguration config)
