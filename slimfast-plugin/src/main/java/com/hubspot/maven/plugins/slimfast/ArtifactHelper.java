@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -125,7 +126,27 @@ public class ArtifactHelper {
       list.add(d);
     }
 
-    for (Artifact a : new LinkedHashSet<>(project.getArtifacts())) {
+    Set<Artifact> artifactsCopy;
+    int attempts = 0;
+    while (true) {
+      try {
+        artifactsCopy = new LinkedHashSet<>(project.getArtifacts());
+        break;
+      } catch (ConcurrentModificationException e) {
+        if (++attempts > 10) {
+          throw new RuntimeException("Failed to copy artifacts after 10 attempts", e);
+        }
+        // Brief pause before retry
+        try {
+          Thread.sleep(10L * attempts);
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+          throw new RuntimeException("Interrupted while retrying artifact copy", ie);
+        }
+      }
+    }
+
+    for (Artifact a : artifactsCopy) {
       if (
         a.getArtifactHandler().isAddedToClasspath() &&
         // TODO let the scope handler deal with this
