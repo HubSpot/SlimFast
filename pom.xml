@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>63.10</version>
+    <version>65.2</version>
   </parent>
 
   <groupId>com.hubspot.slimfast</groupId>
