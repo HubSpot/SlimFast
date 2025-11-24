@@ -118,7 +118,7 @@ public class ArtifactHelper {
    * a defensive copy of project.getArtifacts() prior to iteration, to prevent
    * ConcurrentModificationExceptions.
    */
-  private static List<String> classpathElements(MavenProject project) {
+  private synchronized List<String> classpathElements(MavenProject project) {
     List<String> list = new ArrayList<>(project.getArtifacts().size() + 1);
 
     String d = project.getBuild().getOutputDirectory();
