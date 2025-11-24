@@ -44,6 +44,8 @@ public class ArtifactHelper {
   private static final List<String> ARTIFACT_EXPRESSION_PREFIXES =
     Collections.singletonList("artifact.");
 
+  private static final Object ARTIFACTS_LOCK = new Object();
+
   private final BeanConfigurator beanConfigurator;
   private final MavenProject project;
 
@@ -66,7 +68,7 @@ public class ArtifactHelper {
     }
 
     Set<LocalArtifact> artifacts = new HashSet<>();
-    for (String classpathElement : classpathElements(project)) {
+    for (String classpathElement : classpathElements()) {
       File classpathFile = new File(classpathElement);
       if (classpathFile.getAbsoluteFile().isFile()) {
         Artifact artifact = findArtifactWithFile(project.getArtifacts(), classpathFile);
@@ -118,7 +120,7 @@ public class ArtifactHelper {
    * a defensive copy of project.getArtifacts() prior to iteration, to prevent
    * ConcurrentModificationExceptions.
    */
-  private synchronized List<String> classpathElements(MavenProject project) {
+  private List<String> classpathElements() {
     List<String> list = new ArrayList<>(project.getArtifacts().size() + 1);
 
     String d = project.getBuild().getOutputDirectory();
@@ -130,8 +132,10 @@ public class ArtifactHelper {
     int attempts = 0;
     while (true) {
       try {
-        artifactsCopy = new LinkedHashSet<>(project.getArtifacts());
-        break;
+        synchronized (ARTIFACTS_LOCK) {
+          artifactsCopy = new LinkedHashSet<>(project.getArtifacts());
+          break;
+        }
       } catch (ConcurrentModificationException e) {
         if (++attempts > 10) {
           throw new RuntimeException("Failed to copy artifacts after 10 attempts", e);
