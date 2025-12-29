@@ -12,6 +12,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Mojo(
   name = "write-manifest",
@@ -19,6 +21,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
   requiresDependencyResolution = ResolutionScope.RUNTIME
 )
 public class WriteManifestMojo extends AbstractMojo {
+
+  private static final Logger LOG = LoggerFactory.getLogger(WriteManifestMojo.class);
 
   @Inject
   private ArtifactHelper artifactHelper;
@@ -45,6 +49,11 @@ public class WriteManifestMojo extends AbstractMojo {
     Path prefix = artifactWrapper.getPrefix();
 
     Set<PreparedArtifact> s3Artifacts = new HashSet<>();
+
+    if (s3Artifacts.isEmpty()) {
+      LOG.error("s3Artifacts is empty for {}", outputFile.getParent());
+    }
+
     for (LocalArtifact artifact : artifactWrapper.getArtifacts()) {
       s3Artifacts.add(prepareArtifact(artifact));
     }
