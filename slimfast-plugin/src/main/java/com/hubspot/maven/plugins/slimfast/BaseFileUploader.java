@@ -9,8 +9,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseFileUploader implements FileUploader {
+
+  private static final Logger LOG = LoggerFactory.getLogger(BaseFileUploader.class);
 
   private UploadConfiguration config;
 
@@ -74,6 +78,8 @@ public abstract class BaseFileUploader implements FileUploader {
             .resolve(start + "-" + md5 + end)
             .toString();
       } else {
+        LOG.debug("artifact getLocalPath() = {}", artifact.getLocalPath());
+        LOG.debug("artifact getTargetPath() = {}", artifact.getTargetPath());
         throw new IllegalStateException("Encountered unresolved snapshot: " + file);
       }
     } else {
