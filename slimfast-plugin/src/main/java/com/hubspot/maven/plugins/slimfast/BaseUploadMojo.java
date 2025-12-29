@@ -64,7 +64,7 @@ public abstract class BaseUploadMojo extends AbstractMojo {
   )
   private String outputFile;
 
-  @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "false")
+  @Parameter(property = "slimfast.allowUnresolvedSnapshots", defaultValue = "true")
   private boolean allowUnresolvedSnapshots;
 
   @Override
