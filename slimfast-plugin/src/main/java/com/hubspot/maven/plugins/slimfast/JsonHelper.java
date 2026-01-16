@@ -63,12 +63,10 @@ public class JsonHelper {
       writer.flush();
     }
 
-    if (LOG.isDebugEnabled()) {
-      StringWriter writer = new StringWriter();
-      json.writeJSONString(writer);
+    StringWriter writer = new StringWriter();
+    json.writeJSONString(writer);
 
-      LOG.debug("Wrote artifacts json: {}", writer.toString());
-    }
+    LOG.info("Wrote artifacts json: {}", writer.toString());
   }
 
   public static S3ArtifactWrapper readArtifactsFromJson(File inputFile)
