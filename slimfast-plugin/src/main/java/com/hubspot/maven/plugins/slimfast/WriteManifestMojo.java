@@ -54,13 +54,17 @@ public class WriteManifestMojo extends AbstractMojo {
       s3Artifacts.add(prepareArtifact(artifact));
     }
 
+    if (s3Artifacts.isEmpty()) {
+      LOG.error("s3Artifacts is empty for {}", outputFile.getParent());
+    }
+
     PreparedArtifactWrapper preparedArtifactWrapper = new PreparedArtifactWrapper(
       prefix,
       s3Artifacts
     );
     try {
       if (preparedArtifactWrapper.getArtifacts().isEmpty()) {
-        LOG.error("s3Artifacts is empty for {}", outputFile.getParent());
+        LOG.error("preparedArtifactWrapper is empty for {}", outputFile.getParent());
       }
       JsonHelper.writeArtifactsToJson(outputFile.toFile(), preparedArtifactWrapper);
     } catch (IOException e) {
