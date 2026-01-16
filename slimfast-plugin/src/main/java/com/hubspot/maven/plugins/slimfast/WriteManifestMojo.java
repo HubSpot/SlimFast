@@ -50,12 +50,12 @@ public class WriteManifestMojo extends AbstractMojo {
 
     Set<PreparedArtifact> s3Artifacts = new HashSet<>();
 
-    if (s3Artifacts.isEmpty()) {
-      LOG.error("s3Artifacts is empty for {}", outputFile.getParent());
-    }
-
     for (LocalArtifact artifact : artifactWrapper.getArtifacts()) {
       s3Artifacts.add(prepareArtifact(artifact));
+    }
+
+    if (s3Artifacts.isEmpty()) {
+      LOG.error("s3Artifacts is empty for {}", outputFile.getParent());
     }
 
     PreparedArtifactWrapper preparedArtifactWrapper = new PreparedArtifactWrapper(
