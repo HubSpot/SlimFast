@@ -18,7 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import org.apache.maven.archiver.ManifestConfiguration;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.artifact.Artifact;
@@ -38,7 +37,6 @@ import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.codehaus.plexus.interpolation.ValueSource;
 
 @Named
-@Singleton
 public class ArtifactHelper {
 
   private static final List<String> ARTIFACT_EXPRESSION_PREFIXES =
