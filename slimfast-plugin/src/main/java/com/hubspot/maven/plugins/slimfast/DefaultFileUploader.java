@@ -49,7 +49,7 @@ public class DefaultFileUploader extends BaseFileUploader {
       .stream()
       .filter(artifact -> {
         if (existingKeys.contains(artifact.getKey())) {
-          LOG.info("Key already exists {}", artifact.getKey());
+          LOG.debug("Key already exists {}", artifact.getKey());
           return false;
         } else {
           return true;
